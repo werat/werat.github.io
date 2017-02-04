@@ -6,6 +6,7 @@ categories: tmux ssh ssh-forwarding
 ---
 
 If you often use ssh+tmux combination and ssh keys forwarding, you've definitely been in an unpleasant situation:
+
 * connect to some remote machine via ssh and create a tmux session
 * use it happily
 * detach from tmux and disconnect from server
