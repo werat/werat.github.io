@@ -19,6 +19,7 @@ description: > # this means to ignore newlines until "baseurl:"
   Ordinary software engineering blog about boring stuff.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
+permalink: /:year/:month/:day/:title.html
 twitter_username: werat
 github_username:  werat
 
