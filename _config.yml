@@ -24,6 +24,7 @@ twitter_username: werat
 github_username:  werat
 disqus:
   shortname: werat-github-io
+google_analytics: UA-91441325-1
 
 # Build settings
 markdown: kramdown
