@@ -22,7 +22,7 @@ Let's discuss why this is happening. The magic behind ssh forwarding is quite si
 SSH_AUTH_SOCK=/private/tmp/com.apple.launchd.4ymgbbAxhL/Listeners
 {% endhighlight %}
 
-When you create a new tmux session environment variables from current shell are captured and later used for every new window/pane. Thus all your pane inside tmux will have the same value of `SSH_AUTH_SOCK`. When you disconnect from server ssh connection terminates and socket is deleted. When you reconnect *a new socket is created* (and `SSH_AUTH_SOCK` now points to it), but all your panes inside tmux *still have the old value*.
+When you create a new tmux session environment variables from current shell are captured and later used for every new window/pane. Thus all your panes inside tmux will have the same value of `SSH_AUTH_SOCK`. When you disconnect from server ssh connection terminates and socket is deleted. When you reconnect *a new socket is created* (and `SSH_AUTH_SOCK` now points to it), but all your panes inside tmux *still have the old value*.
 
 What first comes to mind is to find the path of a new socket and export it in broken panes. You can totally do it, but this is pain. For new panes we can tell tmux to reload environment variables. To do so just add the following lines to your `~/.tmux.conf` file:
 
