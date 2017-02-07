@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Happy ssh-forwarding for tmux/screen"
+title:  "Happy ssh agent forwarding for tmux/screen"
 date:   2017-02-04 11:55:00 +0300
 categories: tmux ssh ssh-forwarding
 ---
