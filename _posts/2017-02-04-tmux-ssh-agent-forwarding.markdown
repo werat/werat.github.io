@@ -59,7 +59,7 @@ fi
 
 Great, now for every new ssh connection (and if ssh forwarding is enabled) we'll update the symlink to the new value. And everything will work fine until this connection is terminated.
 
-I personally lived with this solution for quite a long time, until I've started to use lsyncd[^4] for syncing my source code with remote machines. The thing is lsyncd uses rsync for syncing files and this means it creates new ssh connections once in a while. The problem is that when a new connection is created *is updates your symlink*. And when it dies the symlink become broken.
+I personally lived with this solution for quite a long time, until I've started to use lsyncd[^4] for syncing my source code with remote machines. The thing is lsyncd uses rsync for syncing files and this means it creates new ssh connections once in a while. The problem is that when a new connection is created *is updates your symlink*. And when it dies the symlink becomes broken.
 
 To fix this problem I told `/.ssh/rc` not to modify the symlink *if current is still alive*. This way new ssh connections will not interfere touch the symlink until the connection which created it is still alive.
 
