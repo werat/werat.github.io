@@ -50,9 +50,7 @@ The only problem is to maintain the symlink valid. This is where `~/.ssh/rc` com
 
 {% highlight bash %}
 > cat ~/.ssh/rc
-#!/usr/bin/env bash
-
-if [[ -S "$SSH_AUTH_SOCK" ]]; then
+if [ -S "$SSH_AUTH_SOCK" ]; then
     ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
 fi
 {% endhighlight %}
@@ -65,9 +63,7 @@ To fix this problem I told `/.ssh/rc` not to modify the symlink *if current is s
 
 {% highlight bash %}
 > cat ~/.ssh/rc
-#!/usr/bin/env bash
-
-if [[ ! -S ~/.ssh/ssh_auth_sock && -S "$SSH_AUTH_SOCK" ]]; then
+if [ ! -S ~/.ssh/ssh_auth_sock ] && [ -S "$SSH_AUTH_SOCK" ]; then
     ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
 fi
 {% endhighlight %}
