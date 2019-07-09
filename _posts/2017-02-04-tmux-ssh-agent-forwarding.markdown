@@ -46,7 +46,7 @@ If you prefer `screen` (which is weird), you should use `~/.screenrc`[^2]:
 setenv SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
 {% endhighlight %}
 
-The only problem is to maintain the symlink valid. This is where `~/.ssh/rc` comes out. This script is invoked by the SSH server for each incoming SSH connection[^3].
+The only problem is to keep the symlink valid. This is where `~/.ssh/rc` comes out. This script is invoked by the SSH server for each incoming SSH connection[^3].
 
 {% highlight bash %}
 > cat ~/.ssh/rc
@@ -70,7 +70,7 @@ fi
 
 # Summary
 
-1. Setup the `~/.ssh/rc` to maintain the `~/.ssh/ssh_auth_sock` symlink alive
+1. Setup the `~/.ssh/rc` to keep the `~/.ssh/ssh_auth_sock` symlink valid
 2. Setup the `~/.tmux.conf` to make `SSH_AUTH_SOCK` point to the `~/.ssh/ssh_auth_sock`
 3. ...
 4. Profit
