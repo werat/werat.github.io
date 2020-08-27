@@ -3,6 +3,9 @@ layout: post
 title:  "Happy ssh agent forwarding for tmux/screen"
 date:   2017-02-04 11:55:00 +0300
 categories: tmux ssh ssh-forwarding
+
+redirect_from:
+  - /2017/02/04/tmux-ssh-agent-forwarding.html
 ---
 
 If you often use ssh+tmux combination and ssh keys forwarding, you've definitely been in an unpleasant situation:
