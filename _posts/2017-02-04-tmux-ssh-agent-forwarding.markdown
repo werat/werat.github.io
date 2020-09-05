@@ -84,7 +84,7 @@ fi
 
 *Update 2020-09-05*
 
-As noted by [Маятчи Ҁязиде'мѧи](https://disqus.com/by/disqus_QJThfDd5Ae/) in the [comments](/#comment-5047083317), you need to call `xauth` from your `~/.ssh/rc`, otherwise X11 forwarding will not work[^5]. 
+As noted by [Маятчи Ҁязиде'мѧи](https://disqus.com/by/disqus_QJThfDd5Ae/) in the [comments](#comment-5047083317), you need to call `xauth` from your `~/.ssh/rc`, otherwise X11 forwarding will not work[^5]. 
 
 They also pointed out that you can use regular shell rc files (e.g. `~/.bashrc` or `~/.zshrc`) instead of `~/.ssh/rc`. You can just put the code above into your shell rc file and it should work just as fine. Our script updates the symlimk only if the current one is dead, so there is no need for special checks for tmux/screen sessions.
 
