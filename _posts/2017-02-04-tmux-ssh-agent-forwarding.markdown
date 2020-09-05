@@ -20,43 +20,43 @@ If you often use ssh+tmux combination and ssh keys forwarding, you've definitely
 
 Let's discuss why this is happening. The magic behind ssh forwarding is quite simple: ssh-agent creates a socket (on linux usually something like `/tmp/ssh-hRNwjA1342/agent.1342`) which is used by other applications to communicate with ssh-agent. Obviously these applications need a way to find this socket, so ssh-agent also sets an environment variable `SSH_AUTH_SOCK`, which contains path to the socket.
 
-{% highlight bash %}
+```bash
 > env | grep SSH_
 SSH_AUTH_SOCK=/private/tmp/com.apple.launchd.4ymgbbAxhL/Listeners
-{% endhighlight %}
+```
 
 When you create a new tmux session environment variables from current shell are captured and later used for every new window/pane. Thus all your panes inside tmux will have the same value of `SSH_AUTH_SOCK`. When you disconnect from server ssh connection terminates and socket is deleted. When you reconnect *a new socket is created* (and `SSH_AUTH_SOCK` now points to it), but all your panes inside tmux *still have the old value*.
 
 What first comes to mind is to find the path of a new socket and export it in broken panes. You can totally do it, but this is pain. For new panes we can tell tmux to reload environment variables. To do so just add the following lines to your `~/.tmux.conf` file:
 
-{% highlight bash %}
+```bash
 set -g update-environment "SSH_AUTH_SOCK"
-{% endhighlight %}
+```
 
 This is clearly a half measure, because you'll still have all your existing panes being broken every time the ssh connection dies. We might want to modify `SSH_AUTH_SOCK` of existing panes, but there is no good (or even bad, but portable) way to do it. Luckily there is another way.
 
 As I said, `SSH_AUTH_SOCK` points to the current ssh-agent socket and this socket dies, when the connection is terminated. The last thing is a problem, and all problems in computer science can be solved by another level of indirection. Let's point `SSH_AUTH_SOCK` to *a symlink* which is pointing to a ssh-agent socket; this way all panes will have a valid value in `SSH_AUTH_SOCK`. For `tmux` this can be done also via config[^1]:
 
-{% highlight bash %}
+```bash
 > cat ~/.tmux.conf
 set-environment -g 'SSH_AUTH_SOCK' ~/.ssh/ssh_auth_sock
-{% endhighlight %}
+```
 
 If you prefer `screen` (which is weird), you should use `~/.screenrc`[^2]:
 
-{% highlight bash %}
+```bash
 > cat ~/.screenrc
 setenv SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
-{% endhighlight %}
+```
 
 The only problem is to keep the symlink valid. This is where `~/.ssh/rc` comes out. This script is invoked by the SSH server for each incoming SSH connection[^3].
 
-{% highlight bash %}
+```bash
 > cat ~/.ssh/rc
 if [ -S "$SSH_AUTH_SOCK" ]; then
     ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
 fi
-{% endhighlight %}
+```
 
 Great, now for every new ssh connection (and if ssh forwarding is enabled) we'll update the symlink to the new value. And everything will work fine until this connection is terminated.
 
@@ -64,12 +64,12 @@ I personally lived with this solution for quite a long time, until I've started 
 
 To fix this problem I told `/.ssh/rc` not to modify the symlink *if current is still alive*. This way new ssh connections will not touch the symlink until the connection which created it is still alive.
 
-{% highlight bash %}
+```bash
 > cat ~/.ssh/rc
 if [ ! -S ~/.ssh/ssh_auth_sock ] && [ -S "$SSH_AUTH_SOCK" ]; then
     ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
 fi
-{% endhighlight %}
+```
 
 # Summary
 
