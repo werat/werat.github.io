@@ -80,7 +80,7 @@ fi
 
 # Potential issues
 
-### SSHRC and X11 forwarding
+## SSHRC and X11 forwarding!
 
 *Update 2020-09-05*
 
