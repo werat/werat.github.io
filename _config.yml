@@ -5,9 +5,7 @@ description: >
 
 url: "https://werat.github.io"
 baseurl: ""
-
-# TODO(werat): Migrate to shorter format.
-permalink: /:year/:month/:day/:title.html
+permalink: /:year/:month/:day/:title
 
 twitter_username: werat
 github_username:  werat
