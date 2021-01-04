@@ -14,7 +14,9 @@ disqus:
   shortname: werat-github-io
 google_analytics: UA-91441325-1
 
-theme: minima
 plugins:
   - jekyll-feed
   - jekyll-redirect-from
+  - jekyll-remote-theme
+
+remote_theme: jekyll/minima@3cdd14dff1216f561c68329e0b7420c2dc9b796a
