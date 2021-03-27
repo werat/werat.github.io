@@ -37,7 +37,7 @@ Target 0: (a.out) stopped.
 
 LLDB has a very powerfull built-in expression evaluator, powered by Clang. It can handle almost any valid C++ as well as perform function calls. But the downside of this power is poor performance, especially for large programs with lots of debug information. This is not as critical for interactive use, but doesn't work well for implementing IDE integrations. For example, [Stadia debugger for Visual Studio](https://github.com/googlestadia/vsi-lldb) evaluates dozens and hundreds of expressions for every "step", so it has to be fast. Nobody likes slow debuggers!
 
-This is where [lldb-eval](https://github.com/google/lldb-eval) comes in. It's a library for evaluating C++ like expressions in the debugger context, built with performance in mind. It's designed around `LLDB`'s and uses bits some of `Clang` for expression parsing. The API is very similar to `LLDB` and in many cases `lldb-eval` can be used as a drop-in replacement. The rest of this post is about the library architecture and design decisions behind it.
+This is where [lldb-eval](https://github.com/google/lldb-eval) comes in. It's a library for evaluating C++ like expressions in the debugger context, built with performance in mind. It's designed around LLDB, has very similar API and in many cases `lldb-eval` can be used as a drop-in replacement. The rest of this post is about the library architecture and design decisions behind it.
 
 `lldb-eval` is open-source and available on GitHub -- <https://github.com/google/lldb-eval>.
 
@@ -45,15 +45,15 @@ This is where [lldb-eval](https://github.com/google/lldb-eval) comes in. It's a 
 
 ![image](lldb-eval-inception.jpg)
 
-Basically `lldb-eval` is an interpreter for a subset of C++, written in C++. Like a typical interpreter it has an expression parser that produces an AST and an evaluator that evaluates that AST. The parser performs type-checking and semantics analysis, while the evaluator implements the runtime control flow analysis.
+Basically `lldb-eval` is an interpreter for a subset of C++, written in C++. Like a typical interpreter it has a parser that produces an expression AST and an evaluator that evaluates that AST. The parser performs type-checking and semantics analysis, while the evaluator implements the runtime control flow analysis.
 
 ## Expression language
 
-The expression language is a subset of C++ ([EBNF grammar](docs/expr-lang.enbf)). The grammar supports all basic C++ features: arithmetic operators, members access, C-style and C++-style casts, function calls (for supported debugger intrinsics). Overall the set of features is aimed to be compatible with other debuggers and [NatVis rules](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019#BKMK_Expressions_and_formatting).
+The expression language is a subset of C++ ([EBNF grammar](https://github.com/google/lldb-eval/blob/master/docs/expr-lang.ebnf)). The grammar supports all basic C++ features: arithmetic operators, members access, C-style and C++-style casts, function calls (for supported debugger intrinsics). Overall the set of features is aimed to be compatible with other debuggers and [NatVis rules](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019#BKMK_Expressions_and_formatting).
 
 ## Parser
 
-The first core component in `lldb-eval` is `Parser` ([parser.h](lldb-eval/parser.h)). It's a classic [recursive descent parser](https://en.wikipedia.org/wiki/Recursive_descent_parser) with several modifications to accomodate for C++ grammar. Since C++ cannot be expressed in pure [LL grammar](https://en.wikipedia.org/wiki/LL_grammar), the parser performs limited look-ahead and has the ability to do tentative parsing with rollbacks. The input data is limited to one C++ _expression_, although the it can be multi-line and arbitrarily long.
+The first core component in `lldb-eval` is `Parser` ([parser.h](https://github.com/google/lldb-eval/blob/master/lldb-eval/parser.h)). It's a classic [recursive descent parser](https://en.wikipedia.org/wiki/Recursive_descent_parser) with several modifications to accomodate for C++ grammar. Since C++ cannot be expressed in pure [LL grammar](https://en.wikipedia.org/wiki/LL_grammar), the parser performs limited look-ahead and has the ability to do tentative parsing with rollbacks. The input data is limited to one C++ _expression_, although it can be multi-line and arbitrarily long.
 
 The parser relies on `clang` library to do the lexing and preprocessing (using `clang::Preprocessor`) and then processes the stream of C++ token to build an expression [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree). The AST is annotated, meaning that the parser resolves the type for every node and performs the type checking and semantic analysis. The parser tries to produce rich diagnostics (with source locations whenever possible), most errors messages are similar to `clang`:
 
@@ -122,7 +122,7 @@ There are other limitations we face when using public LLDB API. For example, sta
 
 ### Semantic analysis
 
-The semantic analysis in `lldb-eval` is heavily inspired by other C++ compilers (GCC, Clang) and, at its core, is very similar to what they do. The parser resolves the types and performs all kinds of checks to verify that the given expression is valid in the _current context_. This includes simple checks like detecting addition of incompatible types (e.g. `int` and `Foo`), as well as more complicated [integral promotions](https://en.cppreference.com/w/cpp/language/implicit_conversion#Numeric_promotions), implicit type conversions and `lvalue`/`rvalue` control flow analysis.
+The semantic analysis in `lldb-eval` is heavily inspired by other C++ compilers (GCC, Clang) and, at its core, is very similar to what they do. The parser resolves the types and performs all kinds of checks to verify that the given expression is valid in the _current context_. This includes simple checks like detecting addition of incompatible types (e.g. `int` and `Foo`), as well as more complicated [integral promotions](https://en.cppreference.com/w/cpp/language/implicit_conversion#Numeric_promotions), implicit type conversions and `lvalue/rvalue` control flow analysis.
 
 That said, the parser has a number of deliberate deviations from C++ spec due to the fact that the expression interpreter in the debugger has a slightly different goal than the compiler. The compiler is meant to verify that the code is correct and produce the most optimal output, while still maintaining all the invariants of the language specification. The debugger, however, aims to help the developer in inspecting the program state.
 
@@ -158,7 +158,7 @@ Clang [explicitly allows this](https://github.com/llvm/llvm-project/blob/5b2d850
 
 ## Interpreter
 
-The second core component in `lldb-eval` is the `Interpreter` ([eval.h](lldb-eval/eval.h)). It takes the AST produced by the parser and recursively evaluates it. Typically interpreters convert the AST to some kind of [bytecode](https://en.wikipedia.org/wiki/Bytecode) or [IR](https://en.wikipedia.org/wiki/Intermediate_representation) first, but `lldb-eval` skips this step for simplicity.
+The second core component in `lldb-eval` is the `Interpreter` ([eval.h](https://github.com/google/lldb-eval/blob/master/lldb-eval/eval.h)). It takes the AST produced by the parser and recursively evaluates it. Typically interpreters convert the AST to some kind of [bytecode](https://en.wikipedia.org/wiki/Bytecode) or [IR](https://en.wikipedia.org/wiki/Intermediate_representation) first, but `lldb-eval` skips this step for simplicity.
 
 Since the parser is guaranteed to produce a _valid_ AST (or give a reasonable error), the `Interpreter` makes an assumption of correctness -- all the types match, all casts are correct, all functions have correct number of arguments, etc. This doesn't prevent _runtime_ errors though. For example, one can still dereference a null pointer -- `*(int*)0 + 1`. The parser will be happy, but the interpreter will have to deal with zero pointer.
 
