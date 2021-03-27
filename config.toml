@@ -1,0 +1,60 @@
+baseURL = "https://werat.dev/"
+title = "Reboot and Shine"
+theme = "hugo-coder"
+
+disqusShortname = "werat-github-io"
+
+[permalinks]
+  posts = "/blog/:slug/"
+
+[params]
+  logo = "img/logo-avatar.jpg"
+  author = "Andy Hippo"
+  keywords = "blog,developer,personal"
+  avatarURL = "img/logo-avatar.jpg"
+
+  since = 2017
+
+  colorScheme = "auto"
+  hideColorSchemeToggle = false
+
+  customCSS = ["css/custom.css"]
+
+[params.googleTagManager]
+id = "UA-91441325-1"
+
+[[params.social]]
+name = "Github"
+icon = "fa fa-github"
+weight = 1
+url = "https://github.com/werat/"
+
+[[params.social]]
+name = "Twitter"
+icon = "fa fa-twitter"
+weight = 2
+url = "https://twitter.com/werat/"
+
+[[params.social]]
+name = "LinkedIn"
+icon = "fa fa-linkedin"
+weight = 3
+url = "https://www.linkedin.com/in/werat/"
+
+[[menu.main]]
+  name = "Blog"
+  weight = 1
+  url  = "posts/"
+
+[[menu.main]]
+  name = "About"
+  weight = 2
+  url = "about/"
+
+[[params.social]]
+  name = "RSS"
+  icon = "fa fa-rss"
+  weight = 3
+  url = "https://werat.dev/index.xml"
+  rel = "alternate"
+  type = "application/rss+xml"

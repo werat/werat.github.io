@@ -1,10 +1,13 @@
 ---
-layout: post
-title:  "Happy ssh agent forwarding for tmux/screen"
+title: "Happy ssh agent forwarding for tmux/screen"
+slug:  "happy-ssh-agent-forwarding"
 date:   2017-02-04 11:55:00 +0300
-categories: tmux ssh ssh-forwarding
-
-redirect_from:
+tags:
+  - tmux
+  - ssh
+  - ssh-forwarding
+aliases:
+  - /2017/02/04/tmux-ssh-agent-forwarding
   - /2017/02/04/tmux-ssh-agent-forwarding.html
 ---
 
@@ -71,18 +74,18 @@ if [ ! -S ~/.ssh/ssh_auth_sock ] && [ -S "$SSH_AUTH_SOCK" ]; then
 fi
 ```
 
-### Summary
+## Summary
 
 1. Setup the `~/.ssh/rc` to keep the `~/.ssh/ssh_auth_sock` symlink valid
 2. Setup the `~/.tmux.conf` to make `SSH_AUTH_SOCK` point to the `~/.ssh/ssh_auth_sock`
 3. ...
 4. Profit
 
-### Potential issues
+## Potential issues
 
-#### SSHRC and X11 forwarding
+### SSHRC and X11 forwarding
 
-*Update 2020-09-05*
+> Update 2020-09-05
 
 As noted by [Маятчи Ҁязиде'мѧи](https://disqus.com/by/disqus_QJThfDd5Ae/) in the [comments](#comment-5047083317), you need to call `xauth` from your `~/.ssh/rc`, otherwise X11 forwarding will not work[^5].
 
@@ -90,7 +93,7 @@ They also pointed out that you can use regular shell rc files (e.g. `~/.bashrc` 
 
 To be honest, I don't remember if there was a good reason to use `~/.ssh/rc` instead of shell rc. Using `SSHRC` seems slightly more "robust", since it's exactly the place we want to hook in -- ssh session creation. But if it creates more problems, then using shell rc file seems to be a good idea as well.
 
-### Links
+## Links
 
 [^1]: http://man7.org/linux/man-pages/man1/tmux.1.html#ENVIRONMENT
 [^2]: https://www.gnu.org/software/screen/manual/screen.html#Setenv

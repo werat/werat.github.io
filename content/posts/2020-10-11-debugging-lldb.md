@@ -1,8 +1,12 @@
 ---
-layout: post
-title:  "Debugging LLDB with source stepping"
+title: "Debugging LLDB with source stepping"
 date:   2020-10-11 18:35:00 +0100
-categories: lldb debugging
+tags:
+   - lldb
+   - debugging
+aliases:
+  - /2020/10/11/debugging-lldb
+  - /2020/10/11/debugging-lldb.html
 ---
 
 Sometimes you want to (or _need_ to) debug a program that you didn't build yourself and you don't even know _how exactly_ it was built. Depending on the specifics of your setup that could mean many different things:
