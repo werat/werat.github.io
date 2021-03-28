@@ -8,25 +8,16 @@ tags:
   - c++
 ---
 
-Almost every modern debugger supports expression evaluation. It can be used directly by the user (e.g. by typing the expression in the debugger shell) or indirectly by IDEs and other programs via the debugger API. The expression evaluator can be implemented as an interpreter of the target language (that's what GDB does for C++, for example) or by re-using the bits of the compiler infrastructure (LLDB uses Clang, C# debugger in Visual Studio uses Roslyn). Often it's a combination, when the compiler can be used as a library and behaves differenly when invoked by the debugger.
-
-> Side note: if you're interesting in unusual debugger architectures, read about [ACID](https://plan9.io/sys/doc/acidpaper.html) -- the debugger implemented as a language interpreter with specialized primitives that provide debugger support.
-
-The expression evaluation is an integral part of the debugger and both users and IDEs rely on it heavily. It allows the users to inspect the program state using the familiar expression syntax (and just try out some code interactively) and makes it possible to implement custom visualizers for user-defined objects (see [NatVis](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019)).
-
----
-
-[LLDB](https://lldb.llvm.org/) is the debugger component of the LLVM project. It is built as a set of reusable components which extensively use existing libraries from LLVM, such as the Clang expression parser and LLVM disassembler[^1].
+Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you're probably familiar with it via commands like `print`/`call` in GDB or `expr`/`p` in LLDB. It is also used extensively by the IDEs to implement typical UI workflows: [Immediate Window](https://docs.microsoft.com/en-us/visualstudio/ide/reference/immediate-window?view=vs-2019), [Watch Window](https://docs.microsoft.com/en-us/visualstudio/debugger/watch-and-quickwatch-windows?view=vs-2019), hovering over a variables, custom data visualizers (see [NatVis](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019)), etc.
 
 ```c++
-Process 40028 stopped
 * thread #1, queue = 'com.apple.main-thread', stop reason = step in
     frame #0: 0x0000000100003fb2 a.out`main at zero.cc:3:12
    1    int main() {
    2        int i = 1;
 -> 3        return i;
    4    }
-Target 0: (a.out) stopped.
+
 (lldb) expr i + 1
 (int) $0 = 2
 (lldb) expr (float)i + static_cast<int>(1.4) * 3
@@ -35,9 +26,17 @@ Target 0: (a.out) stopped.
 
 ^ example of expression evaluation in LLDB
 
-LLDB has a very powerfull built-in expression evaluator, powered by Clang. It can handle almost any valid C++ as well as perform function calls. But the downside of this power is poor performance, especially for large programs with lots of debug information. This is not as critical for interactive use, but doesn't work well for implementing IDE integrations. For example, [Stadia debugger for Visual Studio](https://github.com/googlestadia/vsi-lldb) evaluates dozens and hundreds of expressions for every "step", so it has to be fast. Nobody likes slow debuggers!
+The expression evaluator can be implemented as an interpreter of the target language (that's what GDB does for C++, for example) or by re-using the bits of the compiler infrastructure (e.g. LLDB uses Clang, C# debugger in Visual Studio uses Roslyn). Often it's a combination, when the compiler can be used as a library and behaves differenly when invoked by the debugger (this is how C# worked in earlier versions of Visual Studio, [twitter thread](https://twitter.com/AnsonHorton/status/1343901623962103809)).
 
-This is where [lldb-eval](https://github.com/google/lldb-eval) comes in. It's a library for evaluating C++ like expressions in the debugger context, built with performance in mind. It's designed around LLDB, has very similar API and in many cases `lldb-eval` can be used as a drop-in replacement. The rest of this post is about the library architecture and design decisions behind it.
+> If you're interesting in the unusual debugger architectures, read about [ACID](https://plan9.io/sys/doc/acidpaper.html) -- the debugger implemented as a language interpreter with specialized primitives that provide debugger support.
+
+---
+
+[LLDB](https://lldb.llvm.org/) is the debugger component of the LLVM project. It is built as a set of reusable components which extensively use existing libraries from LLVM, such as the Clang expression parser and LLVM disassembler[^1].
+
+LLDB has a very powerfull built-in expression evaluator, powered by [Clang](https://clang.llvm.org/). It can handle almost any valid C++ as well as perform function calls. But the downside of this power is poor performance, especially for large programs with lots of debug information. This is not as critical for interactive use, but doesn't work well for implementing IDE integrations. For example, [Stadia debugger for Visual Studio](https://github.com/googlestadia/vsi-lldb) evaluates dozens and hundreds of expressions for every "step", so it has to be fast. Nobody likes slow debuggers!
+
+This is where [lldb-eval](https://github.com/google/lldb-eval) comes in. It's a library for evaluating C++ like expressions in the debugger context, built with performance in mind. It's designed around LLDB, has very similar API and in many cases can be used as a drop-in replacement. The primary use-case is IDE integration (namely, [Stadia for Visual Studio](https://github.com/googlestadia/vsi-lldb)). The rest of this post is about the library architecture and design decisions behind it.
 
 `lldb-eval` is open-source and available on GitHub -- <https://github.com/google/lldb-eval>.
 
@@ -190,7 +189,7 @@ lldb::SBValue EvaluateExpression(
   lldb::SBFrame frame, const char* expression, lldb::SBError& error);
 ```
 
-Usually you'd want the stack frame where the program is currently stopped, but it's possible to use any valid one (e.g. to inspect the variables of the caller function).
+Usually you'd want the stack frame where the program is currently stopped, but it's possible to use any valid one (e.g. from another thread or to inspect the variables of the caller function).
 
 There's a option of using `lldb::SBValue` instead of `lldb::SBFrame`, then the expression is evaluated in the context of the given object:
 
@@ -205,7 +204,7 @@ For example, `this->foo_` or just `foo_` will refer to the member of the context
 
 `lldb-eval` is stateless (and thread-safe), but sometimes it's useful to have some state that the expressions can access and modify. For example, in NatVis [CustomListItems](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019#customlistitems-expansion) allows you to declare variables that can be modified by the expression. Typical examples -- a counter or a pointer to a bucket in hash-table.
 
-Both versions of `EvaluateExpression` allow passing of a list of external identifiers/values that can be accessed (and modified) by the expression. This makes it possible to have a state between the expression evaluations, while keeping the library stateless:
+Both versions of `EvaluateExpression` allow passing of a list of external identifiers/values that can be used by the expression. This makes it possible to have a state between the expression evaluations, while keeping the library stateless:
 
 ```c++
 lldb::SBError ignore;
@@ -223,5 +222,7 @@ while (counter.GetValueAsUnsigned() > 0) {
   lldb_eval::EvaluateExpression(frame, "--counter", vars, ignore);
 }
 ```
+
+The code above creates a `counter` with initial value of `10` and then decrements it in a loop.
 
 [^1]: https://en.wikipedia.org/wiki/LLDB_(debugger)
