@@ -3,14 +3,13 @@
 
   <section class="container list">
     <ul>
-      {{ range .Paginator.Pages }}
+      {{ range where .Site.RegularPages "Section" "posts" }}
       <li>
         <span class="date">{{ .Date.Format (.Site.Params.dateFormat | default "January 2, 2006" ) }}</span>
         <a class="title" href="{{ .Params.externalLink | default .RelPermalink }}">{{ .Title }}</a>
       </li>
       {{ end }}
     </ul>
-    {{ partial "pagination.html" . }}
   </section>
 
 {{ end }}
