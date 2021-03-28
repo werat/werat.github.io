@@ -8,16 +8,16 @@ disqusShortname = "werat-github-io"
   posts = "/blog/:slug/"
 
 [params]
-  logo = "img/logo-avatar.jpg"
+  favicon_32 = "img/logo-avatar-32.png"
+  favicon_16 = "img/logo-avatar-16.png"
+  touchicon = "img/logo-avatar.jpg"
+
   author = "Andy Hippo"
   keywords = "blog,developer,personal"
   avatarURL = "img/logo-avatar.jpg"
-
   since = 2017
-
   colorScheme = "auto"
   hideColorSchemeToggle = false
-
   customCSS = ["css/custom.css"]
 
 [params.googleTagManager]
