@@ -47,9 +47,9 @@ url = "https://www.linkedin.com/in/werat/"
   url  = "posts/"
 
 [[menu.main]]
-  name = "About"
+  name = "Talks"
   weight = 2
-  url = "about/"
+  url = "talks/"
 
 [[params.social]]
   name = "RSS"
