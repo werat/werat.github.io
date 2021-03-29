@@ -225,4 +225,19 @@ while (counter.GetValueAsUnsigned() > 0) {
 
 The code above creates a `counter` with initial value of `10` and then decrements it in a loop.
 
+## Performance
+
+The performance of the expression evaluator depends a lot on several factors. The first and likely the biggest factor in most cases is the binary size and the amount of debug information and its format (PDB, DWARF4/DWARF5). The expression evaluator needs to resolve the types and the identifiers and the more of those the process has, the slower the lookups are. Regular DWARF is not optimized for lookups and LLDB has special auxiliary indexes to support fast lookup operations.
+
+To solve this issues, a new section was introduced in DWARF5 -- `.debug_names`. It contains a pre-built lookup hash table that can be loaded by the debugger and used "as is", without the additional processing. This potentially can reduce the startup time, since the debugger no longer needs to build the indexes manually. However, the format of this hash table is not necessarily optimal and in my experiments I've seen binaries with _extremely_ unoptimal `.debug_names` structure. The section doesn't actually have just one hash table, but might contain multiple entries. If your binary has thousands of these hash tables, the performance is not going to be great. Your mileage may vary, of course, and this should be researched case by case.
+
+Another big factor contributing to the overall performance is the latency to the target process. If you're debugging a program locally the latency can be considered negligible, but if the program runs on a remote machine this is a completely different story. Latency to the remote machine adds up with every command the debugger sends to the debug server. If you have a roundtrip of 10ms-100ms you can effectively send up to 100-10 commands per second. Executing only 10 expressions per second doesn't sound like a lot, right?
+
+In both `LLDB` and `lldb-eval` not every evaluation involves sending commands to the remote process.
+LLDB will try to interpret the expression locally first and only if that is not possible, it will execute the code remotely. For example, simple expression like `1 + 2` can be interpreted by the debugger host, but expressions with function calls must be executed at the target.
+
+In `lldb-eval` all expressions are interpreted locally and the only communication with the target process we need is reading its memory (e.g. values of the variables). This information is cached in the debugger host, so network requests happen only when necessary. Unfortunately, LLDB's remote debugging protocol is not especially optimized for minimizing the amount of messages, so there is some inefficiency here. Optimizing the protocol could improve the overall performance (and not just for `lldb-eval`).
+
+Overall, a rough baseline for `lldb-eval` is `~1ms` per expression evaluation. This gives us about 200 of expressions in 200ms, which is approximately the latency humans can observe and tolerate -- everything above starts to feel sluggish. For comparison, expression evaluator in LLDB can take up to `50-100ms` per expression on the binaries in my testing lab. I understand it's a bold claim and needs some proof, so I'm working on getting some "publishable" results and disclosing the setup of the testing lab.
+
 [^1]: https://en.wikipedia.org/wiki/LLDB_(debugger)
