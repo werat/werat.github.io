@@ -32,7 +32,7 @@ The expression evaluator can be implemented as an interpreter of the target lang
 
 ---
 
-[LLDB](https://lldb.llvm.org/) is the debugger component of the LLVM project. It is built as a set of reusable components which extensively use existing libraries from LLVM, such as the Clang expression parser and LLVM disassembler[^1].
+[LLDB](https://lldb.llvm.org/) is the debugger component of the LLVM project. It is built as a set of reusable components which extensively use existing libraries from LLVM, such as the Clang expression parser and LLVM disassembler.
 
 LLDB has a very powerfull built-in expression evaluator, powered by [Clang](https://clang.llvm.org/). It can handle almost any valid C++ as well as perform function calls. But the downside of this power is poor performance, especially for large programs with lots of debug information. This is not as critical for interactive use, but doesn't work well for implementing IDE integrations. For example, [Stadia debugger for Visual Studio](https://github.com/googlestadia/vsi-lldb) evaluates dozens and hundreds of expressions for every "step", so it has to be fast. Nobody likes slow debuggers!
 
@@ -240,4 +240,8 @@ In `lldb-eval` all expressions are interpreted locally and the only communicatio
 
 Overall, a rough baseline for `lldb-eval` is `~1ms` per expression evaluation. This gives us about 200 of expressions in 200ms, which is approximately the latency humans can observe and tolerate -- everything above starts to feel sluggish. For comparison, expression evaluator in LLDB can take up to `50-100ms` per expression on the binaries in my testing lab. I understand it's a bold claim and needs some proof, so I'm working on getting some "publishable" results and disclosing the setup of the testing lab.
 
-[^1]: https://en.wikipedia.org/wiki/LLDB_(debugger)
+---
+
+Discuss this article on [lobste.rs](https://lobste.rs/s/jvskdh/blazing_fast_expression_evaluation_for_c)
+
+---
