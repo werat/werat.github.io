@@ -89,10 +89,6 @@ fi
 
 As noted by [Маятчи Ҁязиде'мѧи](https://disqus.com/by/disqus_QJThfDd5Ae/) in the [comments](#comment-5047083317), you need to call `xauth` from your `~/.ssh/rc`, otherwise X11 forwarding will not work[^5].
 
-They also pointed out that you can use regular shell rc files (e.g. `~/.bashrc` or `~/.zshrc`) instead of `~/.ssh/rc`. You can just put the code above into your shell rc file and it should work just as fine. Our script updates the symlimk only if the current one is dead, so there is no need for special checks for tmux/screen sessions.
-
-To be honest, I don't remember if there was a good reason to use `~/.ssh/rc` instead of shell rc. Using `SSHRC` seems slightly more "robust", since it's exactly the place we want to hook in -- ssh session creation. But if it creates more problems, then using shell rc file seems to be a good idea as well.
-
 ## Links
 
 [^1]: http://man7.org/linux/man-pages/man1/tmux.1.html#ENVIRONMENT
