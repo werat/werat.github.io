@@ -16,30 +16,36 @@ disqusShortname = "werat-github-io"
   keywords = "blog,developer,personal"
   avatarURL = "img/logo-avatar.jpg"
   since = 2017
-  colorScheme = "auto"
-  hideColorSchemeToggle = false
+  colorScheme = "light"
+  hideColorSchemeToggle = true
   customCSS = ["css/custom.css"]
 
 [params.googleTagManager]
-id = "UA-91441325-1"
+  id = "UA-91441325-1"
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.highlight]
+  style = "friendly"
 
 [[params.social]]
-name = "Github"
-icon = "fa fa-github"
-weight = 1
-url = "https://github.com/werat/"
+  name = "Github"
+  icon = "fa fa-github"
+  weight = 1
+  url = "https://github.com/werat/"
 
 [[params.social]]
-name = "Twitter"
-icon = "fa fa-twitter"
-weight = 2
-url = "https://twitter.com/werat/"
+  name = "Twitter"
+  icon = "fa fa-twitter"
+  weight = 2
+  url = "https://twitter.com/werat/"
 
 [[params.social]]
-name = "LinkedIn"
-icon = "fa fa-linkedin"
-weight = 3
-url = "https://www.linkedin.com/in/werat/"
+  name = "LinkedIn"
+  icon = "fa fa-linkedin"
+  weight = 3
+  url = "https://www.linkedin.com/in/werat/"
 
 [[menu.main]]
   name = "Blog"
