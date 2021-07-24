@@ -1,104 +1,240 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=content-language content="en"><meta name=color-scheme content="light dark"><meta name=author content="Andy Hippo"><meta name=description content="Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However &ldquo;performance is a feature&rdquo; and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.
-Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with cargo bench (docs) and Go has go test -bench (docs). For C++ there is google/benchmark &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort."><meta name=keywords content="blog,developer,personal"><meta name=twitter:card content="summary"><meta name=twitter:title content="Running benchmarks for Pull Requests via GitHub Actions"><meta name=twitter:description content="Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However &ldquo;performance is a feature&rdquo; and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.
-Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with cargo bench (docs) and Go has go test -bench (docs). For C++ there is google/benchmark &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort."><meta property="og:title" content="Running benchmarks for Pull Requests via GitHub Actions"><meta property="og:description" content="Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However &ldquo;performance is a feature&rdquo; and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.
-Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with cargo bench (docs) and Go has go test -bench (docs). For C++ there is google/benchmark &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort."><meta property="og:type" content="article"><meta property="og:url" content="https://werat.dev/blog/running-benchmarks-for-pull-requests-via-github-actions/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-06-28T13:35:00+01:00"><meta property="article:modified_time" content="2021-06-28T13:35:00+01:00"><title>Running benchmarks for Pull Requests via GitHub Actions · Reboot and Shine</title><link rel=canonical href=https://werat.dev/blog/running-benchmarks-for-pull-requests-via-github-actions/><link rel=preload href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as=font type=font/woff2 crossorigin><link rel=stylesheet href=/css/coder.min.34dfa7b2f5cdeb0f5302b2628f4a7a4bfe88a2431e1397ee4ec605c56ab69701.css integrity="sha256-NN+nsvXN6w9TArJij0p6S/6IokMeE5fuTsYFxWq2lwE=" crossorigin=anonymous media=screen><link rel=stylesheet href=/css/coder-dark.min.aa883b9ce35a8ff4a2a5008619005175e842bb18a8a9f9cc2bbcf44dab2d91fa.css integrity="sha256-qog7nONaj/SipQCGGQBRdehCuxioqfnMK7z0Tastkfo=" crossorigin=anonymous media=screen><link rel=stylesheet href=/css/custom.css><link rel=icon type=image/png href=/img/logo-avatar-32.png sizes=32x32><link rel=icon type=image/png href=/img/logo-avatar-16.png sizes=16x16><link rel=apple-touch-icon href=/img/logo-avatar.jpg><link rel=apple-touch-icon sizes=180x180 href=/img/logo-avatar.jpg><meta name=generator content="Hugo 0.85.0"></head><body class="preload-transitions colorscheme-auto"><div class=float-container><a id=dark-mode-toggle class=colorscheme-toggle><i class="fa fa-adjust fa-fw" aria-hidden=true></i></a></div><main class=wrapper><nav class=navigation><section class=container><a class=navigation-title href=/>Reboot and Shine</a>
+<!doctype html><html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta http-equiv=content-language content="en">
+<meta name=color-scheme content="light dark">
+<meta name=author content="Andy Hippo">
+<meta name=description content="Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However &ldquo;performance is a feature&rdquo; and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.
+Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with cargo bench (docs) and Go has go test -bench (docs). For C++ there is google/benchmark &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort.">
+<meta name=keywords content="blog,developer,personal">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Running benchmarks for Pull Requests via GitHub Actions">
+<meta name=twitter:description content="Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However &ldquo;performance is a feature&rdquo; and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.
+Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with cargo bench (docs) and Go has go test -bench (docs). For C++ there is google/benchmark &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort.">
+<meta property="og:title" content="Running benchmarks for Pull Requests via GitHub Actions">
+<meta property="og:description" content="Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However &ldquo;performance is a feature&rdquo; and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.
+Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with cargo bench (docs) and Go has go test -bench (docs). For C++ there is google/benchmark &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://werat.dev/blog/running-benchmarks-for-pull-requests-via-github-actions/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2021-06-28T13:35:00+01:00">
+<meta property="article:modified_time" content="2021-06-28T13:35:00+01:00">
+<title>
+Running benchmarks for Pull Requests via GitHub Actions · Reboot and Shine
+</title>
+<link rel=canonical href=https://werat.dev/blog/running-benchmarks-for-pull-requests-via-github-actions/>
+<link rel=preload href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as=font type=font/woff2 crossorigin>
+<link rel=stylesheet href=/css/coder.min.34dfa7b2f5cdeb0f5302b2628f4a7a4bfe88a2431e1397ee4ec605c56ab69701.css integrity="sha256-NN+nsvXN6w9TArJij0p6S/6IokMeE5fuTsYFxWq2lwE=" crossorigin=anonymous media=screen>
+<link rel=stylesheet href=/css/custom.css>
+<link rel=icon type=image/png href=/img/logo-avatar-32.png sizes=32x32>
+<link rel=icon type=image/png href=/img/logo-avatar-16.png sizes=16x16>
+<link rel=apple-touch-icon href=/img/logo-avatar.jpg>
+<link rel=apple-touch-icon sizes=180x180 href=/img/logo-avatar.jpg>
+<meta name=generator content="Hugo 0.86.0">
+</head>
+<body class="preload-transitions colorscheme-light">
+<main class=wrapper>
+<nav class=navigation>
+<section class=container>
+<a class=navigation-title href=/>
+Reboot and Shine
+</a>
 <input type=checkbox id=menu-toggle>
-<label class="menu-button float-right" for=menu-toggle><i class="fa fa-bars fa-fw" aria-hidden=true></i></label><ul class=navigation-list><li class=navigation-item><a class=navigation-link href=/posts/>Blog</a></li><li class=navigation-item><a class=navigation-link href=/talks/>Talks</a></li></ul></section></nav><div class=content><section class="container post"><article><header><div class=post-title><h1 class=title><a class=title-link href=https://werat.dev/blog/running-benchmarks-for-pull-requests-via-github-actions/>Running benchmarks for Pull Requests via GitHub Actions</a></h1></div><div class=post-meta><div class=date><span class=posted-on><i class="fa fa-calendar" aria-hidden=true></i>
-<time datetime=2021-06-28T13:35:00+01:00>June 28, 2021</time></span>
-<span class=reading-time><i class="fa fa-clock-o" aria-hidden=true></i>
-6-minute read</span></div><div class=tags><i class="fa fa-tag" aria-hidden=true></i>
-<span class=tag><a href=/tags/benchmark/>benchmark</a></span>
+<label class="menu-button float-right" for=menu-toggle>
+<i class="fa fa-bars fa-fw" aria-hidden=true></i>
+</label>
+<ul class=navigation-list>
+<li class=navigation-item>
+<a class=navigation-link href=/posts/>Blog</a>
+</li>
+<li class=navigation-item>
+<a class=navigation-link href=/talks/>Talks</a>
+</li>
+</ul>
+</section>
+</nav>
+<div class=content>
+<section class="container post">
+<article>
+<header>
+<div class=post-title>
+<h1 class=title>
+<a class=title-link href=https://werat.dev/blog/running-benchmarks-for-pull-requests-via-github-actions/>
+Running benchmarks for Pull Requests via GitHub Actions
+</a>
+</h1>
+</div>
+<div class=post-meta>
+<div class=date>
+<span class=posted-on>
+<i class="fa fa-calendar" aria-hidden=true></i>
+<time datetime=2021-06-28T13:35:00+01:00>
+June 28, 2021
+</time>
+</span>
+<span class=reading-time>
+<i class="fa fa-clock-o" aria-hidden=true></i>
+6-minute read
+</span>
+</div>
+<div class=tags>
+<i class="fa fa-tag" aria-hidden=true></i>
+<span class=tag>
+<a href=/tags/benchmark/>benchmark</a>
+</span>
 <span class=separator>•</span>
-<span class=tag><a href=/tags/ci/>ci</a></span>
+<span class=tag>
+<a href=/tags/ci/>ci</a>
+</span>
 <span class=separator>•</span>
-<span class=tag><a href=/tags/github-actions/>github-actions</a></span></div></div></header><div><p>Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However <a href=https://blog.codinghorror.com/performance-is-a-feature/>&ldquo;performance is a feature&rdquo;</a> and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.</p><p>Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with <code>cargo bench</code> (<a href=https://doc.rust-lang.org/cargo/commands/cargo-bench.html>docs</a>) and Go has <code>go test -bench</code> (<a href=https://golang.org/pkg/testing/#hdr-Benchmarks>docs</a>). For C++ there is <a href=https://github.com/google/benchmark>google/benchmark</a> &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort.</p><p>Last week I was looking into setting up some automated benchmarking for my project <a href=https://github.com/google/lldb-eval>google/lldb-eval</a>. It&rsquo;s written in C++ (and already affiliated with Google 😃 ), so <a href=https://github.com/google/benchmark>google/benchmark</a> feels like a natural choice. For the &ldquo;automated&rdquo; part I was thinking about a simple GitHub Action &ndash; for every pull request run the benchmark on for BASE and HEAD commits, compare the results and post them as a review comment.</p><p>The final result looks like <a href=https://github.com/google/lldb-eval/pull/131#issuecomment-846019771>this</a> and the rest of the post is about how I got there:</p><p><img src=pr-comment.png alt=image></p><hr><p>First we need to write some benchmarks. As I mentioned ealier, for that I&rsquo;m using <a href=https://github.com/google/benchmark>google/benchmark</a> &ndash; a library to benchmark code snippets, very similar to unit tests. The basic example as simple as:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;benchmark/benchmark.h&gt;</span><span style=color:#75715e>
-</span><span style=color:#75715e></span>
-<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>BM_SomeFunction</span>(benchmark<span style=color:#f92672>::</span>State<span style=color:#f92672>&amp;</span> state) {
-  <span style=color:#75715e>// Perform setup here
-</span><span style=color:#75715e></span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>auto</span> _ : state) {
-    <span style=color:#75715e>// This code gets timed
-</span><span style=color:#75715e></span>    SomeFunction();
+<span class=tag>
+<a href=/tags/github-actions/>github-actions</a>
+</span></div>
+</div>
+</header>
+<div>
+<p>Benchmarks are often underestimated and don&rsquo;t get the same attention as tests. However <a href=https://blog.codinghorror.com/performance-is-a-feature/>&ldquo;performance is a feature&rdquo;</a> and when something is not tested it might as well be just broken. If the performance is not measured/tracked regressions are inevitable.</p>
+<p>Modern tooling makes it really easy to write benchmarks. Some languages have built-in support, for example, Rust comes with <code>cargo bench</code> (<a href=https://doc.rust-lang.org/cargo/commands/cargo-bench.html>docs</a>) and Go has <code>go test -bench</code> (<a href=https://golang.org/pkg/testing/#hdr-Benchmarks>docs</a>). For C++ there is <a href=https://github.com/google/benchmark>google/benchmark</a> &ndash; not as streamlined as having it built into the language infrastructure, but still definitely worth the effort.</p>
+<p>Last week I was looking into setting up some automated benchmarking for my project <a href=https://github.com/google/lldb-eval>google/lldb-eval</a>. It&rsquo;s written in C++ (and already affiliated with Google 😃 ), so <a href=https://github.com/google/benchmark>google/benchmark</a> feels like a natural choice. For the &ldquo;automated&rdquo; part I was thinking about a simple GitHub Action &ndash; for every pull request run the benchmark on for BASE and HEAD commits, compare the results and post them as a review comment.</p>
+<p>The final result looks like <a href=https://github.com/google/lldb-eval/pull/131#issuecomment-846019771>this</a> and the rest of the post is about how I got there:</p>
+<p><img src=pr-comment.png alt=image></p>
+<hr>
+<p>First we need to write some benchmarks. As I mentioned ealier, for that I&rsquo;m using <a href=https://github.com/google/benchmark>google/benchmark</a> &ndash; a library to benchmark code snippets, very similar to unit tests. The basic example as simple as:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#007020>#include</span> <span style=color:#007020>&lt;benchmark/benchmark.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020></span>
+<span style=color:#007020;font-weight:700>static</span> <span style=color:#902000>void</span> <span style=color:#06287e>BM_SomeFunction</span>(benchmark<span style=color:#666>::</span>State<span style=color:#666>&amp;</span> state) {
+  <span style=color:#60a0b0;font-style:italic>// Perform setup here
+</span><span style=color:#60a0b0;font-style:italic></span>  <span style=color:#007020;font-weight:700>for</span> (<span style=color:#007020;font-weight:700>auto</span> <span style=color:#002070;font-weight:700>_</span> : state) {
+    <span style=color:#60a0b0;font-style:italic>// This code gets timed
+</span><span style=color:#60a0b0;font-style:italic></span>    SomeFunction();
   }
 }
-<span style=color:#75715e>// Register the function as a benchmark
-</span><span style=color:#75715e></span>BENCHMARK(BM_SomeFunction);
-</code></pre></div><p>Real-life examples might require one-time setup and teardown logic (e.g. launch a process, attach the debugger, shutdown everything at the end), which can be implemented via <a href=https://github.com/google/benchmark/#fixtures>Fixtures</a>. There are more advanced features, but I&rsquo;m not using them at the moment. The current set of benchmarks for <code>lldb-eval</code> can be found in <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/lldb-eval/eval_benchmark.cc>lldb-eval/eval-benchmarks.cc</a>.</p><p>Using <a href=https://github.com/google/benchmark>google/benchmark</a> with Bazel is pretty straightforward. The library already has support for building with Bazel (<a href=https://github.com/google/benchmark/blob/master/BUILD.bazel>BUILD.bazel</a>), so you just need to declare the dependency in your <code>WORKSPACE</code> file and then you can use it as any other third-party library.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e># WORKSPACE
-</span><span style=color:#75715e></span>http_archive(
-    name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;com_google_benchmark&#34;</span>,
-    sha256 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;bdefa4b03c32d1a27bd50e37ca466d8127c1688d834800c38f3c587a396188ee&#34;</span>,
-    strip_prefix <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;benchmark-1.5.3&#34;</span>,
-    urls <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#34;https://github.com/google/benchmark/archive/v1.5.3.zip&#34;</span>],
+<span style=color:#60a0b0;font-style:italic>// Register the function as a benchmark
+</span><span style=color:#60a0b0;font-style:italic></span>BENCHMARK(BM_SomeFunction);
+</code></pre></div><p>Real-life examples might require one-time setup and teardown logic (e.g. launch a process, attach the debugger, shutdown everything at the end), which can be implemented via <a href=https://github.com/google/benchmark/#fixtures>Fixtures</a>. There are more advanced features, but I&rsquo;m not using them at the moment. The current set of benchmarks for <code>lldb-eval</code> can be found in <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/lldb-eval/eval_benchmark.cc>lldb-eval/eval-benchmarks.cc</a>.</p>
+<p>Using <a href=https://github.com/google/benchmark>google/benchmark</a> with Bazel is pretty straightforward. The library already has support for building with Bazel (<a href=https://github.com/google/benchmark/blob/master/BUILD.bazel>BUILD.bazel</a>), so you just need to declare the dependency in your <code>WORKSPACE</code> file and then you can use it as any other third-party library.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#007020># WORKSPACE
+</span><span style=color:#007020></span>http_archive(
+    name <span style=color:#666>=</span> <span style=color:#4070a0>&#34;com_google_benchmark&#34;</span>,
+    sha256 <span style=color:#666>=</span> <span style=color:#4070a0>&#34;bdefa4b03c32d1a27bd50e37ca466d8127c1688d834800c38f3c587a396188ee&#34;</span>,
+    strip_prefix <span style=color:#666>=</span> <span style=color:#4070a0>&#34;benchmark-1.5.3&#34;</span>,
+    urls <span style=color:#666>=</span> [<span style=color:#4070a0>&#34;https://github.com/google/benchmark/archive/v1.5.3.zip&#34;</span>],
 )
 
-<span style=color:#75715e># BUILD
-</span><span style=color:#75715e></span>cc_binary(
-    name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;benchmark&#34;</span>,
-    srcs <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#34;benchmark.cc&#34;</span>],
-    deps <span style=color:#f92672>=</span> [
-        <span style=color:#e6db74>&#34;:your_library&#34;</span>,
-        <span style=color:#e6db74>&#34;@com_google_benchmark//:benchmark_main&#34;</span>,
+<span style=color:#007020># BUILD
+</span><span style=color:#007020></span>cc_binary(
+    name <span style=color:#666>=</span> <span style=color:#4070a0>&#34;benchmark&#34;</span>,
+    srcs <span style=color:#666>=</span> [<span style=color:#4070a0>&#34;benchmark.cc&#34;</span>],
+    deps <span style=color:#666>=</span> [
+        <span style=color:#4070a0>&#34;:your_library&#34;</span>,
+        <span style=color:#4070a0>&#34;@com_google_benchmark//:benchmark_main&#34;</span>,
     ],
 )
-</code></pre></div><p>The <code>benchmark</code> target here is a regular <code>cc_binary</code>, so you can run it with <code>bazel run</code>:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>&gt; bazel run -c opt :benchmark
+</code></pre></div><p>The <code>benchmark</code> target here is a regular <code>cc_binary</code>, so you can run it with <code>bazel run</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>&gt; bazel run -c opt :benchmark
 ...
 ----------------------------------------------------------
 Benchmark                Time             CPU   Iterations
 ----------------------------------------------------------
-BM_SomeFunction      <span style=color:#ae81ff>23141</span> ns        <span style=color:#ae81ff>23077</span> ns        <span style=color:#ae81ff>30307</span>
-</code></pre></div><hr><p>Now we need to figure out how to make this into some automated process. Searching the GitHub Marketplace yielded a <code>GitHub Action for Continuous Benchmarking</code> (<a href=https://github.com/rhysd/github-action-benchmark>rhysd/github-action-benchmark</a>). It seems to support a number of languages and frameworks (Rust, Go, C++, JS, Python) as well as polyglot projects (i.e. multiple languages in the same repository) and has a handful of features &ndash; e.g. it can record all your measurements and display nice charts showing the performance over time &ndash; <a href=https://rhysd.github.io/github-action-benchmark/dev/bench>https://rhysd.github.io/github-action-benchmark/dev/bench</a>.</p><p>However it doesn&rsquo;t seem to support the simplest workflow I wanted &ndash; just run the benchmark for incoming changes and show if there are performance regressions or improvements. Moreover the documentation explicitly doesn&rsquo;t recommend to run the action on pull requests:</p><blockquote><p>Please ensure that your benchmark workflow runs only on your branches. Please avoid running it on pull requests. If a branch were pushed to GitHub pages branch on a pull request, anyone who creates a pull request on your repository could modify your GitHub pages branch.</p></blockquote><p>I guess it&rsquo;s time to write some YAML :)</p><p><strong>TL;DR</strong> the final workflow is here &ndash; <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/.github/workflows/benchmarks.yml>lldb-eval/.github/workflows/benchmarks.yml</a>. Below I will cover the most interesting parts.</p><p>The basic setup is trivial: trigger on pull requests, run on Ubuntu, checkout the repo, create some temporary files for intermediate results, etc. The interesting part starts with running the benchmarks. We need to run the benchmarks twice: for the BASE (i.e. parent) and for the HEAD ref (i.e. pull request). In <code>git</code> it&rsquo;s easy to switch between commits &ndash; sounds like a job for the <code>git checkout</code> command:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=color:#75715e># Run for BASE</span>
-git checkout <span style=color:#e6db74>${</span>{ github.event.pull_request.base.sha <span style=color:#e6db74>}</span><span style=color:#f92672>}</span>
+BM_SomeFunction      <span style=color:#40a070>23141</span> ns        <span style=color:#40a070>23077</span> ns        <span style=color:#40a070>30307</span>
+</code></pre></div><hr>
+<p>Now we need to figure out how to make this into some automated process. Searching the GitHub Marketplace yielded a <code>GitHub Action for Continuous Benchmarking</code> (<a href=https://github.com/rhysd/github-action-benchmark>rhysd/github-action-benchmark</a>). It seems to support a number of languages and frameworks (Rust, Go, C++, JS, Python) as well as polyglot projects (i.e. multiple languages in the same repository) and has a handful of features &ndash; e.g. it can record all your measurements and display nice charts showing the performance over time &ndash; <a href=https://rhysd.github.io/github-action-benchmark/dev/bench>https://rhysd.github.io/github-action-benchmark/dev/bench</a>.</p>
+<p>However it doesn&rsquo;t seem to support the simplest workflow I wanted &ndash; just run the benchmark for incoming changes and show if there are performance regressions or improvements. Moreover the documentation explicitly doesn&rsquo;t recommend to run the action on pull requests:</p>
+<blockquote>
+<p>Please ensure that your benchmark workflow runs only on your branches. Please avoid running it on pull requests. If a branch were pushed to GitHub pages branch on a pull request, anyone who creates a pull request on your repository could modify your GitHub pages branch.</p>
+</blockquote>
+<p>I guess it&rsquo;s time to write some YAML :)</p>
+<p><strong>TL;DR</strong> the final workflow is here &ndash; <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/.github/workflows/benchmarks.yml>lldb-eval/.github/workflows/benchmarks.yml</a>. Below I will cover the most interesting parts.</p>
+<p>The basic setup is trivial: trigger on pull requests, run on Ubuntu, checkout the repo, create some temporary files for intermediate results, etc. The interesting part starts with running the benchmarks. We need to run the benchmarks twice: for the BASE (i.e. parent) and for the HEAD ref (i.e. pull request). In <code>git</code> it&rsquo;s easy to switch between commits &ndash; sounds like a job for the <code>git checkout</code> command:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=color:#60a0b0;font-style:italic># Run for BASE</span>
+git checkout <span style=color:#70a0d0;font-style:italic>${</span>{ github.event.pull_request.base.sha <span style=color:#70a0d0;font-style:italic>}</span><span style=color:#666>}</span>
 bazel run lldb-eval:eval_benchmark &gt; base.json
 
-<span style=color:#75715e># Run for HEAD</span>
-git checkout <span style=color:#e6db74>${</span>{ github.event.pull_request.head.sha <span style=color:#e6db74>}</span><span style=color:#f92672>}</span>
+<span style=color:#60a0b0;font-style:italic># Run for HEAD</span>
+git checkout <span style=color:#70a0d0;font-style:italic>${</span>{ github.event.pull_request.head.sha <span style=color:#70a0d0;font-style:italic>}</span><span style=color:#666>}</span>
 bazel run lldb-eval:eval_benchmark &gt; head.json
-</code></pre></div><blockquote><p>Some parameters are omitted for simplicity, see full script in <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/.github/workflows/benchmarks.yml>benchmarks.yml</a></p></blockquote><p>For comparing two benchmark runs <a href=https://github.com/google/benchmark>google/benchmark</a> provides a script <a href=https://github.com/google/benchmark/blob/db2de74cc8c34131a6f673e35751935cc1897a0d/tools/compare.py>tools/compare.py</a>. Sounds like exactly what we need! When using it with GitHub Actions I&rsquo;ve encountered a small hiccup, however. Just calling <code>bazel run //tools:compare</code> fails with a quite cryptic error:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>bazel run //tools:compare -- --no-color benchmarks base.json head.json
-</code></pre></div><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>Traceback (most recent call last):
-  File <span style=color:#e6db74>&#34;/home/runner/.cache/bazel/_bazel_runner/77c7513313c82b78a5db5d85413329b8/execroot/com_github_google_benchmark/bazel-out/k8-py2-fastbuild/bin/tools/compare.runfiles/com_github_google_benchmark/tools/compare.py&#34;</span>, line <span style=color:#ae81ff>13</span>, <span style=color:#f92672>in</span> <span style=color:#f92672>&lt;</span>module<span style=color:#f92672>&gt;</span>
-    <span style=color:#f92672>from</span> gbench <span style=color:#f92672>import</span> util, report
-  File <span style=color:#e6db74>&#34;/home/runner/work/lldb-eval/lldb-eval/google_benchmark/tools/gbench/report.py&#34;</span>, line <span style=color:#ae81ff>8</span>, <span style=color:#f92672>in</span> <span style=color:#f92672>&lt;</span>module<span style=color:#f92672>&gt;</span>
-    <span style=color:#f92672>from</span> scipy.stats <span style=color:#f92672>import</span> mannwhitneyu
-  File <span style=color:#e6db74>&#34;/home/runner/.cache/bazel/_bazel_runner/77c7513313c82b78a5db5d85413329b8/execroot/com_github_google_benchmark/bazel-out/k8-py2-fastbuild/bin/tools/compare.runfiles/py_deps/pypi__scipy/scipy/__init__.py&#34;</span>, line <span style=color:#ae81ff>61</span>, <span style=color:#f92672>in</span> <span style=color:#f92672>&lt;</span>module<span style=color:#f92672>&gt;</span>
-    <span style=color:#f92672>from</span> numpy <span style=color:#f92672>import</span> show_config <span style=color:#66d9ef>as</span> show_numpy_config
-  File <span style=color:#e6db74>&#34;/home/runner/.cache/bazel/_bazel_runner/77c7513313c82b78a5db5d85413329b8/execroot/com_github_google_benchmark/bazel-out/k8-py2-fastbuild/bin/tools/compare.runfiles/py_deps/pypi__numpy/numpy/__init__.py&#34;</span>, line <span style=color:#ae81ff>292</span>
-<span style=color:#a6e22e>SyntaxError</span>: Non<span style=color:#f92672>-</span>ASCII character <span style=color:#e6db74>&#39;</span><span style=color:#ae81ff>\xef</span><span style=color:#e6db74>&#39;</span> <span style=color:#f92672>in</span> file <span style=color:#f92672>/</span>home<span style=color:#f92672>/</span>runner<span style=color:#f92672>/.</span>cache<span style=color:#f92672>/</span>bazel<span style=color:#f92672>/</span>_bazel_runner<span style=color:#f92672>/</span><span style=color:#ae81ff>77</span>c7513313c82b78a5db5d85413329b8<span style=color:#f92672>/</span>execroot<span style=color:#f92672>/</span>com_github_google_benchmark<span style=color:#f92672>/</span>bazel<span style=color:#f92672>-</span>out<span style=color:#f92672>/</span>k8<span style=color:#f92672>-</span>py2<span style=color:#f92672>-</span>fastbuild<span style=color:#f92672>/</span>bin<span style=color:#f92672>/</span>tools<span style=color:#f92672>/</span>compare<span style=color:#f92672>.</span>runfiles<span style=color:#f92672>/</span>py_deps<span style=color:#f92672>/</span>pypi__numpy<span style=color:#f92672>/</span>numpy<span style=color:#f92672>/</span>__init__<span style=color:#f92672>.</span>p on line <span style=color:#ae81ff>293</span>, but no encoding declared; see http:<span style=color:#f92672>//</span>python<span style=color:#f92672>.</span>org<span style=color:#f92672>/</span>dev<span style=color:#f92672>/</span>peps<span style=color:#f92672>/</span>pep<span style=color:#f92672>-</span><span style=color:#ae81ff>0263</span><span style=color:#f92672>/</span> <span style=color:#66d9ef>for</span> details
-</code></pre></div><p>Hmmm, what is this character <code>'\xef'</code>?? I don&rsquo;t see anything suspicious (<a href=https://github.com/numpy/numpy/blob/6d7b8aaed5ae9f0435764675ebac8c9ada06738f/numpy/__init__.py#L292>link</a>):</p><p><img src=numpy-mac.png alt=image></p><p>Let&rsquo;s try downloading this file and look what&rsquo;s actually there:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>In [<span style=color:#ae81ff>1</span>]: r <span style=color:#f92672>=</span> requests<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;https://raw.githubusercontent.com/numpy/numpy/6d7b8aaed5ae9f0435764675ebac8c9ada06738f/numpy/__init__.py&#39;</span>)
+</code></pre></div><blockquote>
+<p>Some parameters are omitted for simplicity, see full script in <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/.github/workflows/benchmarks.yml>benchmarks.yml</a></p>
+</blockquote>
+<p>For comparing two benchmark runs <a href=https://github.com/google/benchmark>google/benchmark</a> provides a script <a href=https://github.com/google/benchmark/blob/db2de74cc8c34131a6f673e35751935cc1897a0d/tools/compare.py>tools/compare.py</a>. Sounds like exactly what we need! When using it with GitHub Actions I&rsquo;ve encountered a small hiccup, however. Just calling <code>bazel run //tools:compare</code> fails with a quite cryptic error:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>bazel run //tools:compare -- --no-color benchmarks base.json head.json
+</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>Traceback (most recent call last):
+  File <span style=color:#4070a0>&#34;/home/runner/.cache/bazel/_bazel_runner/77c7513313c82b78a5db5d85413329b8/execroot/com_github_google_benchmark/bazel-out/k8-py2-fastbuild/bin/tools/compare.runfiles/com_github_google_benchmark/tools/compare.py&#34;</span>, line <span style=color:#40a070>13</span>, <span style=color:#007020;font-weight:700>in</span> <span style=color:#666>&lt;</span>module<span style=color:#666>&gt;</span>
+    <span style=color:#007020;font-weight:700>from</span> <span style=color:#0e84b5;font-weight:700>gbench</span> <span style=color:#007020;font-weight:700>import</span> util, report
+  File <span style=color:#4070a0>&#34;/home/runner/work/lldb-eval/lldb-eval/google_benchmark/tools/gbench/report.py&#34;</span>, line <span style=color:#40a070>8</span>, <span style=color:#007020;font-weight:700>in</span> <span style=color:#666>&lt;</span>module<span style=color:#666>&gt;</span>
+    <span style=color:#007020;font-weight:700>from</span> <span style=color:#0e84b5;font-weight:700>scipy.stats</span> <span style=color:#007020;font-weight:700>import</span> mannwhitneyu
+  File <span style=color:#4070a0>&#34;/home/runner/.cache/bazel/_bazel_runner/77c7513313c82b78a5db5d85413329b8/execroot/com_github_google_benchmark/bazel-out/k8-py2-fastbuild/bin/tools/compare.runfiles/py_deps/pypi__scipy/scipy/__init__.py&#34;</span>, line <span style=color:#40a070>61</span>, <span style=color:#007020;font-weight:700>in</span> <span style=color:#666>&lt;</span>module<span style=color:#666>&gt;</span>
+    <span style=color:#007020;font-weight:700>from</span> <span style=color:#0e84b5;font-weight:700>numpy</span> <span style=color:#007020;font-weight:700>import</span> show_config <span style=color:#007020;font-weight:700>as</span> show_numpy_config
+  File <span style=color:#4070a0>&#34;/home/runner/.cache/bazel/_bazel_runner/77c7513313c82b78a5db5d85413329b8/execroot/com_github_google_benchmark/bazel-out/k8-py2-fastbuild/bin/tools/compare.runfiles/py_deps/pypi__numpy/numpy/__init__.py&#34;</span>, line <span style=color:#40a070>292</span>
+<span style=color:#007020>SyntaxError</span>: Non<span style=color:#666>-</span>ASCII character <span style=color:#4070a0>&#39;</span><span style=color:#4070a0;font-weight:700>\xef</span><span style=color:#4070a0>&#39;</span> <span style=color:#007020;font-weight:700>in</span> file <span style=color:#666>/</span>home<span style=color:#666>/</span>runner<span style=color:#666>/.</span>cache<span style=color:#666>/</span>bazel<span style=color:#666>/</span>_bazel_runner<span style=color:#666>/</span><span style=color:#40a070>77</span>c7513313c82b78a5db5d85413329b8<span style=color:#666>/</span>execroot<span style=color:#666>/</span>com_github_google_benchmark<span style=color:#666>/</span>bazel<span style=color:#666>-</span>out<span style=color:#666>/</span>k8<span style=color:#666>-</span>py2<span style=color:#666>-</span>fastbuild<span style=color:#666>/</span><span style=color:#007020>bin</span><span style=color:#666>/</span>tools<span style=color:#666>/</span>compare<span style=color:#666>.</span>runfiles<span style=color:#666>/</span>py_deps<span style=color:#666>/</span>pypi__numpy<span style=color:#666>/</span>numpy<span style=color:#666>/</span>__init__<span style=color:#666>.</span>p on line <span style=color:#40a070>293</span>, but no encoding declared; see http:<span style=color:#666>//</span>python<span style=color:#666>.</span>org<span style=color:#666>/</span>dev<span style=color:#666>/</span>peps<span style=color:#666>/</span>pep<span style=color:#666>-</span><span style=color:#40a070>0263</span><span style=color:#666>/</span> <span style=color:#007020;font-weight:700>for</span> details
+</code></pre></div><p>Hmmm, what is this character <code>'\xef'</code>?? I don&rsquo;t see anything suspicious (<a href=https://github.com/numpy/numpy/blob/6d7b8aaed5ae9f0435764675ebac8c9ada06738f/numpy/__init__.py#L292>link</a>):</p>
+<p><img src=numpy-mac.png alt=image></p>
+<p>Let&rsquo;s try downloading this file and look what&rsquo;s actually there:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>In [<span style=color:#40a070>1</span>]: r <span style=color:#666>=</span> requests<span style=color:#666>.</span>get(<span style=color:#4070a0>&#39;https://raw.githubusercontent.com/numpy/numpy/6d7b8aaed5ae9f0435764675ebac8c9ada06738f/numpy/__init__.py&#39;</span>)
 
-In [<span style=color:#ae81ff>2</span>]: lines <span style=color:#f92672>=</span> r<span style=color:#f92672>.</span>content<span style=color:#f92672>.</span>split(<span style=color:#e6db74>b</span><span style=color:#e6db74>&#39;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#39;</span>)
+In [<span style=color:#40a070>2</span>]: lines <span style=color:#666>=</span> r<span style=color:#666>.</span>content<span style=color:#666>.</span>split(<span style=color:#4070a0>b</span><span style=color:#4070a0>&#39;</span><span style=color:#4070a0;font-weight:700>\n</span><span style=color:#4070a0>&#39;</span>)
 
-In [<span style=color:#ae81ff>3</span>]: lines[<span style=color:#ae81ff>290</span>]
-Out[<span style=color:#ae81ff>3</span>]: <span style=color:#e6db74>b</span><span style=color:#e6db74>&#39;        Quick Sanity check for Windows OS: look for fmod bug issue 16744.</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#39;</span>
+In [<span style=color:#40a070>3</span>]: lines[<span style=color:#40a070>290</span>]
+Out[<span style=color:#40a070>3</span>]: <span style=color:#4070a0>b</span><span style=color:#4070a0>&#39;        Quick Sanity check for Windows OS: look for fmod bug issue 16744.</span><span style=color:#4070a0;font-weight:700>\n</span><span style=color:#4070a0>&#39;</span>
 
-In [<span style=color:#ae81ff>4</span>]: lines[<span style=color:#ae81ff>291</span>]
-Out[<span style=color:#ae81ff>4</span>]: <span style=color:#e6db74>b</span><span style=color:#e6db74>&#39;</span><span style=color:#ae81ff>\xef\xbf\xbc</span><span style=color:#e6db74>       &#34;&#34;&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#39;</span>
-</code></pre></div><p>&mldr; What the heck? At least this matches the error message <code>Non-ASCII character '\xef' ...</code>. <code>\xef\xbf\xbc</code> is <code>\uFFFC</code> in Unicode and means <a href="https://codepoints.net/U+FFFC?lang=en">OBJECT REPLACEMENT CHARACTER</a>. In this particular case it looks like just a mistake. In Python 3 the source files are implicitly treated as UTF8 and this symbol is ignored. In Python 2 the default encoding is ASCII, hence the error.</p><p>The Bazel rule builds and runs the script with <code>python_version = "PY2"</code> (<a href=https://github.com/google/benchmark/blob/db2de74cc8c34131a6f673e35751935cc1897a0d/tools/BUILD.bazel#L15>src</a>), but the versions of <code>numpy</code> and <code>scipy</code> defined in the requirements have already dropped support for Python 2. Luckily <code>compare.py</code> is Python 3 compatible, so there we can just replace <code>PY2->PY3</code> with a sed-spell:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>sed -i <span style=color:#e6db74>&#39;s/PY2/PY3/g&#39;</span> tools/BUILD.bazel
-</code></pre></div><p>The comparison step in the GitHub Action now looks like this:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>sed -i <span style=color:#e6db74>&#39;s/PY2/PY3/g&#39;</span> tools/BUILD.bazel
+In [<span style=color:#40a070>4</span>]: lines[<span style=color:#40a070>291</span>]
+Out[<span style=color:#40a070>4</span>]: <span style=color:#4070a0>b</span><span style=color:#4070a0>&#39;</span><span style=color:#4070a0;font-weight:700>\xef\xbf\xbc</span><span style=color:#4070a0>       &#34;&#34;&#34;</span><span style=color:#4070a0;font-weight:700>\n</span><span style=color:#4070a0>&#39;</span>
+</code></pre></div><p>&mldr; What the heck? At least this matches the error message <code>Non-ASCII character '\xef' ...</code>. <code>\xef\xbf\xbc</code> is <code>\uFFFC</code> in Unicode and means <a href="https://codepoints.net/U+FFFC?lang=en">OBJECT REPLACEMENT CHARACTER</a>. In this particular case it looks like just a mistake. In Python 3 the source files are implicitly treated as UTF8 and this symbol is ignored. In Python 2 the default encoding is ASCII, hence the error.</p>
+<p>The Bazel rule builds and runs the script with <code>python_version = "PY2"</code> (<a href=https://github.com/google/benchmark/blob/db2de74cc8c34131a6f673e35751935cc1897a0d/tools/BUILD.bazel#L15>src</a>), but the versions of <code>numpy</code> and <code>scipy</code> defined in the requirements have already dropped support for Python 2. Luckily <code>compare.py</code> is Python 3 compatible, so there we can just replace <code>PY2->PY3</code> with a sed-spell:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>sed -i <span style=color:#4070a0>&#39;s/PY2/PY3/g&#39;</span> tools/BUILD.bazel
+</code></pre></div><p>The comparison step in the GitHub Action now looks like this:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>sed -i <span style=color:#4070a0>&#39;s/PY2/PY3/g&#39;</span> tools/BUILD.bazel
 bazel run //tools:compare -- --no-color benchmarks base.json head.json &gt; cmp_results
-</code></pre></div><p>Now that we&rsquo;ve managed to run the benchmarks and get the comparison results the only thing left is to post the results somewhere. I&rsquo;ve decided to submit the results as a comment to the pull request being tested. GitHub supports Markdown in comments, so we can render a nice table with some links:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=color:#75715e># Sometime earlier...</span>
-echo <span style=color:#e6db74>&#34;BASE_SHA=</span><span style=color:#66d9ef>$(</span>echo <span style=color:#e6db74>${</span>{ github.event.pull_request.base.sha <span style=color:#e6db74>}</span><span style=color:#f92672>}</span> | cut -c1-8<span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span> &gt;&gt; $GITHUB_ENV
-echo <span style=color:#e6db74>&#34;HEAD_SHA=</span><span style=color:#66d9ef>$(</span>echo <span style=color:#e6db74>${</span>{ github.event.pull_request.head.sha <span style=color:#e6db74>}</span><span style=color:#f92672>}</span> | cut -c1-8<span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span> &gt;&gt; $GITHUB_ENV
-echo <span style=color:#e6db74>&#34;PR_COMMENT=</span><span style=color:#66d9ef>$(</span>mktemp<span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span> &gt;&gt; $GITHUB_ENV
+</code></pre></div><p>Now that we&rsquo;ve managed to run the benchmarks and get the comparison results the only thing left is to post the results somewhere. I&rsquo;ve decided to submit the results as a comment to the pull request being tested. GitHub supports Markdown in comments, so we can render a nice table with some links:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=color:#60a0b0;font-style:italic># Sometime earlier...</span>
+<span style=color:#007020>echo</span> <span style=color:#4070a0>&#34;BASE_SHA=</span><span style=color:#007020;font-weight:700>$(</span><span style=color:#007020>echo</span> <span style=color:#70a0d0;font-style:italic>${</span>{ github.event.pull_request.base.sha <span style=color:#70a0d0;font-style:italic>}</span><span style=color:#666>}</span> | cut -c1-8<span style=color:#007020;font-weight:700>)</span><span style=color:#4070a0>&#34;</span> &gt;&gt; <span style=color:#bb60d5>$GITHUB_ENV</span>
+<span style=color:#007020>echo</span> <span style=color:#4070a0>&#34;HEAD_SHA=</span><span style=color:#007020;font-weight:700>$(</span><span style=color:#007020>echo</span> <span style=color:#70a0d0;font-style:italic>${</span>{ github.event.pull_request.head.sha <span style=color:#70a0d0;font-style:italic>}</span><span style=color:#666>}</span> | cut -c1-8<span style=color:#007020;font-weight:700>)</span><span style=color:#4070a0>&#34;</span> &gt;&gt; <span style=color:#bb60d5>$GITHUB_ENV</span>
+<span style=color:#007020>echo</span> <span style=color:#4070a0>&#34;PR_COMMENT=</span><span style=color:#007020;font-weight:700>$(</span>mktemp<span style=color:#007020;font-weight:700>)</span><span style=color:#4070a0>&#34;</span> &gt;&gt; <span style=color:#bb60d5>$GITHUB_ENV</span>
 
-<span style=color:#75715e># Format the comment.</span>
-echo <span style=color:#e6db74>&#39;Benchmark comparison for [`${{ env.BASE_SHA }}`](${{ github.event.repository.html_url }}/commit/${{ github.event.pull_request.base.sha }}) (base) vs [`${{ env.HEAD_SHA }}`](${{ github.event.repository.html_url }}/commit/${{ github.event.pull_request.head.sha }}) (PR)&#39;</span> &gt;&gt; pr_comment
-echo <span style=color:#e6db74>&#39;```&#39;</span> &gt;&gt; pr_comment
-tail -n +2 cmp_results &gt;&gt; pr_comment  <span style=color:#75715e># Skip the first line saying &#34;Comparing XX to YY&#34;</span>
-echo <span style=color:#e6db74>&#39;```&#39;</span> &gt;&gt; pr_comment
-cat pr_comment &gt; <span style=color:#e6db74>${</span>{ env.PR_COMMENT <span style=color:#e6db74>}</span><span style=color:#f92672>}</span>
-</code></pre></div><p>For actually posting the comment we can use <a href=https://github.com/actions/github-script>actions/github-script</a>:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml>- <span style=color:#f92672>name</span>: <span style=color:#e6db74>&#39;Comment PR&#39;</span>
-  <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/github-script@v4.0.2</span>
-  <span style=color:#f92672>with</span>:
-    <span style=color:#f92672>github-token</span>: <span style=color:#ae81ff>${{ secrets.GITHUB_TOKEN }}</span>
-    <span style=color:#f92672>script</span>: |<span style=color:#e6db74>
-</span><span style=color:#e6db74>      github.issues.createComment({
-</span><span style=color:#e6db74>        issue_number: context.issue.number,
-</span><span style=color:#e6db74>        owner: context.repo.owner,
-</span><span style=color:#e6db74>        repo: context.repo.repo,
-</span><span style=color:#e6db74>        body: require(&#39;fs&#39;).readFileSync(&#39;${{ env.PR_COMMENT }}&#39;).toString()
-</span><span style=color:#e6db74>      });</span>      
-</code></pre></div><p>Again, the final workflow is available here &ndash; <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/.github/workflows/benchmarks.yml>lldb-eval/.github/workflows/benchmarks.yml</a>.</p><hr><p>Happy benchmarking!</p></div><footer><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//werat-github-io.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></footer></article></section></div><footer class=footer><section class=container>©
+<span style=color:#60a0b0;font-style:italic># Format the comment.</span>
+<span style=color:#007020>echo</span> <span style=color:#4070a0>&#39;Benchmark comparison for [`${{ env.BASE_SHA }}`](${{ github.event.repository.html_url }}/commit/${{ github.event.pull_request.base.sha }}) (base) vs [`${{ env.HEAD_SHA }}`](${{ github.event.repository.html_url }}/commit/${{ github.event.pull_request.head.sha }}) (PR)&#39;</span> &gt;&gt; pr_comment
+<span style=color:#007020>echo</span> <span style=color:#4070a0>&#39;```&#39;</span> &gt;&gt; pr_comment
+tail -n +2 cmp_results &gt;&gt; pr_comment  <span style=color:#60a0b0;font-style:italic># Skip the first line saying &#34;Comparing XX to YY&#34;</span>
+<span style=color:#007020>echo</span> <span style=color:#4070a0>&#39;```&#39;</span> &gt;&gt; pr_comment
+cat pr_comment &gt; <span style=color:#70a0d0;font-style:italic>${</span>{ env.PR_COMMENT <span style=color:#70a0d0;font-style:italic>}</span><span style=color:#666>}</span>
+</code></pre></div><p>For actually posting the comment we can use <a href=https://github.com/actions/github-script>actions/github-script</a>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml>- <span style=color:#062873;font-weight:700>name</span>:<span style=color:#bbb> </span><span style=color:#4070a0>&#39;Comment PR&#39;</span><span style=color:#bbb>
+</span><span style=color:#bbb>  </span><span style=color:#062873;font-weight:700>uses</span>:<span style=color:#bbb> </span>actions/github-script@v4.0.2<span style=color:#bbb>
+</span><span style=color:#bbb>  </span><span style=color:#062873;font-weight:700>with</span>:<span style=color:#bbb>
+</span><span style=color:#bbb>    </span><span style=color:#062873;font-weight:700>github-token</span>:<span style=color:#bbb> </span>${{ secrets.GITHUB_TOKEN }}<span style=color:#bbb>
+</span><span style=color:#bbb>    </span><span style=color:#062873;font-weight:700>script</span>:<span style=color:#bbb> </span>|<span style=color:#4070a0;font-style:italic>
+</span><span style=color:#4070a0;font-style:italic>      github.issues.createComment({
+</span><span style=color:#4070a0;font-style:italic>        issue_number: context.issue.number,
+</span><span style=color:#4070a0;font-style:italic>        owner: context.repo.owner,
+</span><span style=color:#4070a0;font-style:italic>        repo: context.repo.repo,
+</span><span style=color:#4070a0;font-style:italic>        body: require(&#39;fs&#39;).readFileSync(&#39;${{ env.PR_COMMENT }}&#39;).toString()
+</span><span style=color:#4070a0;font-style:italic>      });</span><span style=color:#bbb>      
+</span></code></pre></div><p>Again, the final workflow is available here &ndash; <a href=https://github.com/google/lldb-eval/blob/4317381e1fa6b97aa661d8f274121ca4fd5fe889/.github/workflows/benchmarks.yml>lldb-eval/.github/workflows/benchmarks.yml</a>.</p>
+<hr>
+<p>Happy benchmarking!</p>
+</div>
+<footer>
+<div id=disqus_thread></div>
+<script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//werat-github-io.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script>
+<noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript>
+<a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a>
+</footer>
+</article>
+</section>
+</div>
+<footer class=footer>
+<section class=container>
+©
 2017 -
 2021
 Andy Hippo
 ·
-Powered by <a href=https://gohugo.io/>Hugo</a> & <a href=https://github.com/luizdepra/hugo-coder/>Coder</a>.</section></footer></main><script src=/js/coder.min.03b17769f4f91ae35667e1f2a1ca8c16f50562576cf90ff32b3179926914daa5.js integrity="sha256-A7F3afT5GuNWZ+HyocqMFvUFYlds+Q/zKzF5kmkU2qU="></script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-91441325-1"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-91441325-1')</script></body></html>
+Powered by <a href=https://gohugo.io/>Hugo</a> & <a href=https://github.com/luizdepra/hugo-coder/>Coder</a>.
+</section>
+</footer>
+</main>
+<script src=/js/coder.min.03b17769f4f91ae35667e1f2a1ca8c16f50562576cf90ff32b3179926914daa5.js integrity="sha256-A7F3afT5GuNWZ+HyocqMFvUFYlds+Q/zKzF5kmkU2qU="></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-91441325-1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-91441325-1')</script>
+</body>
+</html>
