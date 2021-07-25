@@ -13,19 +13,21 @@ body {
 }
 
 code {
-    padding: 1px 5px;
-    border: 1px solid #e8e8e8;
+    padding: 2px 4px;
+    margin: 0px 2px;
+    border: 1px solid #bbbbbb;
     border-radius: 5px;
-    background-color: #eef;
+    background-color: #1b1f230d;
+    font-size: 90%;
+    white-space: nowrap;
 }
 pre > code {
     border: 0;
+    white-space: pre;
 }
-body.colorscheme-dark code {
-    border: 1px solid #424242;
-}
-body.colorscheme-dark pre > code {
-    border: 0;
+.highlight > pre {
+    border-radius: 0.5rem;
+    border: 1px solid #bbbbbb;
 }
 
 .list ul li .date {
@@ -38,3 +40,6 @@ body.colorscheme-dark pre > code {
     font-weight: unset;
 }
 
+a {
+    font-weight: unset;
+}
