@@ -1,6 +1,6 @@
 ---
 title: "Installing Visual Studio extensions from MSI"
-date:   2021-08-07 11:22:00 +0100
+date:   2021-08-07 11:23:00 +0100
 tags:
    - visual-studio
    - vsix
