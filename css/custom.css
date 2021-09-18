@@ -7,6 +7,15 @@
     hyphens: unset;
 }
 
+.content .post .post-meta .tags {
+    margin-top: 0.1em;
+}
+
+.content .post .post-meta .tags .tag {
+    background-color: unset;
+    padding: unset;
+}
+
 body {
     font-size: 1.6em;
     line-height: 1.6em;
