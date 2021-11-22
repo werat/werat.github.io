@@ -27,7 +27,7 @@ Installing Visual Studio extensions from MSI · Reboot and Shine
 <link rel=icon type=image/png href=/img/logo-avatar-16.png sizes=16x16>
 <link rel=apple-touch-icon href=/img/logo-avatar.jpg>
 <link rel=apple-touch-icon sizes=180x180 href=/img/logo-avatar.jpg>
-<meta name=generator content="Hugo 0.88.1">
+<meta name=generator content="Hugo 0.89.4">
 </head>
 <body class="preload-transitions colorscheme-light">
 <main class=wrapper>
@@ -151,9 +151,9 @@ August 7, 2021
             <span style=color:#062873;font-weight:700>&#34;selectedState&#34;</span>: <span style=color:#4070a0>&#34;IndividuallySelected&#34;</span>,
             <span style=color:#062873;font-weight:700>&#34;userSelectedState&#34;</span>: <span style=color:#4070a0>&#34;Explicit&#34;</span>
         },
-        <span>//</span> <span>Add</span> <span>this</span> <span>item</span> <span>for</span> <span>your</span> <span>extension</span>
-        <span>//</span> <span>↓</span>
-        {
+        <span style=color:#60a0b0;font-style:italic>// Add this item for your extension
+</span><span style=color:#60a0b0;font-style:italic></span>        <span style=color:#60a0b0;font-style:italic>// ↓
+</span><span style=color:#60a0b0;font-style:italic></span>        {
             <span style=color:#062873;font-weight:700>&#34;id&#34;</span>: <span style=color:#4070a0>&#34;Component.EXTENSION_ID&#34;</span>,
             <span style=color:#062873;font-weight:700>&#34;version&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_VERSION&#34;</span>,
             <span style=color:#062873;font-weight:700>&#34;type&#34;</span>: <span style=color:#4070a0>&#34;Component&#34;</span>,
@@ -177,9 +177,9 @@ August 7, 2021
             <span style=color:#062873;font-weight:700>&#34;type&#34;</span>: <span style=color:#4070a0>&#34;Component&#34;</span>,
             <span style=color:#062873;font-weight:700>&#34;extension&#34;</span>: <span style=color:#007020;font-weight:700>true</span>
         },
-        <span>//</span> <span>Add</span> <span>these</span> <span>items</span> <span>for</span> <span>your</span> <span>extension</span>
-        <span>//</span> <span>↓</span>
-        {
+        <span style=color:#60a0b0;font-style:italic>// Add these items for your extension
+</span><span style=color:#60a0b0;font-style:italic></span>        <span style=color:#60a0b0;font-style:italic>// ↓
+</span><span style=color:#60a0b0;font-style:italic></span>        {
             <span style=color:#062873;font-weight:700>&#34;id&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_ID&#34;</span>,
             <span style=color:#062873;font-weight:700>&#34;version&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_VERSION&#34;</span>,
             <span style=color:#062873;font-weight:700>&#34;type&#34;</span>: <span style=color:#4070a0>&#34;Vsix&#34;</span>
@@ -194,8 +194,8 @@ August 7, 2021
 }
 </code></pre></div><p>As you&rsquo;ve probably noticed the package cache directory also containes bunch of directories named like <code>Component.Foo,version=1.1</code> and <code>Foo,version=1.1</code>. This looks more like a cache now! To complete the &ldquo;installation&rdquo; we&rsquo;ll need to create those directories for our extension as well.</p>
 <p>First let&rsquo;s look inside our <code>VSIX</code> packages and see what configs are available there. There&rsquo;re two interesting ones for us: <code>catalog.json</code> and <code>manifest.json</code>.</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span>//</span> <span>catalog.json</span>
-{
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#60a0b0;font-style:italic>// catalog.json
+</span><span style=color:#60a0b0;font-style:italic></span>{
     <span style=color:#062873;font-weight:700>&#34;manifestVersion&#34;</span>: <span style=color:#4070a0>&#34;1.1&#34;</span>,
     <span style=color:#062873;font-weight:700>&#34;info&#34;</span>: {
         <span style=color:#062873;font-weight:700>&#34;id&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_ID,version=EXTENSION_VERSION&#34;</span>,
@@ -217,8 +217,8 @@ August 7, 2021
         }
     ]
 }
-</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span>//</span> <span>manifest.json</span>
-{
+</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#60a0b0;font-style:italic>// manifest.json
+</span><span style=color:#60a0b0;font-style:italic></span>{
     <span style=color:#062873;font-weight:700>&#34;id&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_ID&#34;</span>,
     <span style=color:#062873;font-weight:700>&#34;version&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_VERSION&#34;</span>,
     <span style=color:#062873;font-weight:700>&#34;type&#34;</span>: <span style=color:#4070a0>&#34;Vsix&#34;</span>,
@@ -239,8 +239,8 @@ August 7, 2021
 </code></pre></div><p>The data from these configs will be used to create the directories mentioned above.</p>
 <p>The <code>Component</code> is the easier one, it has only one file &ndash; <code>_payload.json</code>. The contents can be extracted from <code>catalog.json</code> &ndash; it&rsquo;s the item with <code>"type": "Component"</code> in the <code>packages</code> list.</p>
 <p><code>%PackageCache%\Component.EXTENSION_ID,version=EXTENSION_VERSION\_package.json</code>:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span>//</span> <span>Item</span> <span>with</span> <span>type=Component</span> <span>from</span> <span>the</span> <span style=color:#4070a0>&#34;packages&#34;</span> <span>list</span> <span>in</span> <span>`catalog.json`.</span>
-{
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#60a0b0;font-style:italic>// Item with type=Component from the &#34;packages&#34; list in `catalog.json`.
+</span><span style=color:#60a0b0;font-style:italic></span>{
     <span style=color:#062873;font-weight:700>&#34;id&#34;</span>: <span style=color:#4070a0>&#34;Component.EXTENSION_ID&#34;</span>,
     <span style=color:#062873;font-weight:700>&#34;version&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_VERSION&#34;</span>,
     <span style=color:#062873;font-weight:700>&#34;type&#34;</span>: <span style=color:#4070a0>&#34;Component&#34;</span>,
@@ -250,8 +250,8 @@ August 7, 2021
 }<span>,</span>
 </code></pre></div><p>The other one is a bit more complicated and requires some stitching &ndash; we&rsquo;ll have to combine the data from <code>catalog.json</code> and <code>manifest.json</code>.</p>
 <p><code>%PackageCache%\EXTENSION_ID,version=EXTENSION_VERSION\_package.json</code>:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span>//</span> <span>Item</span> <span>with</span> <span>type=Vsix</span> <span>from</span> <span>the</span> <span>&#39;packages&#39;</span> <span>list</span> <span>in</span> <span>`catalog.json`.</span>
-{
+<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#60a0b0;font-style:italic>// Item with type=Vsix from the &#39;packages&#39; list in `catalog.json`.
+</span><span style=color:#60a0b0;font-style:italic></span>{
     <span style=color:#062873;font-weight:700>&#34;id&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_ID&#34;</span>,
     <span style=color:#062873;font-weight:700>&#34;version&#34;</span>: <span style=color:#4070a0>&#34;EXTENSION_VERSION&#34;</span>,
     <span style=color:#062873;font-weight:700>&#34;type&#34;</span>: <span style=color:#4070a0>&#34;Vsix&#34;</span>,
@@ -267,8 +267,8 @@ August 7, 2021
         <span style=color:#062873;font-weight:700>&#34;targetDrive&#34;</span>: <span style=color:#40a070>1337</span>
     },
 
-    <span>//</span> <span>&#39;files&#39;</span> <span>item</span> <span>from</span> <span>`manifest.json`.</span>
-    <span style=color:#062873;font-weight:700>&#34;files&#34;</span>: [
+    <span style=color:#60a0b0;font-style:italic>// &#39;files&#39; item from `manifest.json`.
+</span><span style=color:#60a0b0;font-style:italic></span>    <span style=color:#062873;font-weight:700>&#34;files&#34;</span>: [
         {
             <span style=color:#062873;font-weight:700>&#34;fileName&#34;</span>: <span style=color:#4070a0>&#34;/extension.vsixmanifest&#34;</span>,
             <span style=color:#062873;font-weight:700>&#34;sha256&#34;</span>: <span style=color:#007020;font-weight:700>null</span>
