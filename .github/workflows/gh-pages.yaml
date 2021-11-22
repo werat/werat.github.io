@@ -1,6 +1,7 @@
 name: GitHub Pages
 
 on:
+  workflow_dispatch:  # Enable running the workflow manually
   push:
     branches:
       - main
