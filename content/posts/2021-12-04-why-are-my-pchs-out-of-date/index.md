@@ -56,12 +56,12 @@ It's size is `327` bytes (op1), and modification time is `1515919184` (op2), whi
 datetime.datetime(2018, 1, 14, 8, 39, 44, tzinfo=datetime.timezone.utc)
 ```
 
-To summarize what we know about both files so far:
+To summarize what we know so far:
 
-* **wordsize.h (PCH)**
+* **wordsize.h (from PCH)**
   * size -- 327 bytes
   * mtime -- 1515919184 (`2018-01-14 08:39:44 +0000`)
-* **wordsize.h (disk)**
+* **wordsize.h (on disk)**
   * size -- 327 bytes
   * mtime -- 1515922784 (`2018-01-14 09:39:44 +0000`)
 
