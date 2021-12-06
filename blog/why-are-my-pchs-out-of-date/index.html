@@ -113,7 +113,7 @@ Modify<span>:</span> 2018-01-14 10<span>:</span>39<span>:</span>44.000000000 +01
 Change<span>:</span> 2021-12-02 13<span>:</span>58<span>:</span>10.281221500 +0100
  Birth<span>:</span> 2018-01-14 10<span>:</span>39<span>:</span>44.000000000 +0100
 </code></pre></div><p>But surprisingly right after I installed the new SDK, I was getting the same build error too. Oh boy, this is going to be interesting. Down to the rabbit hole!</p>
-<img src=quick-adventure.jpg alt="quick adventure meme" style=max-width:500px>
+<img src=quick-adventure.jpg alt="quick adventure meme" style=max-width:500px;width:100%>
 <hr>
 <p>The error we&rsquo;re seeing when building Unreal is coming from <code>clang</code> &ndash; the compiler complains that some of the input files of the precompiled header have been modified (i.e. their <code>mtime</code> is different from what is stored in the PCH). Let&rsquo;s peek inside the the PCH and see whether they are actually different:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-powershell data-lang=powershell><span style=color:#60a0b0;font-style:italic># Dump the contents of the PCH (https://clang.llvm.org/docs/PCHInternals.html#ast-file-contents)</span>
@@ -124,35 +124,25 @@ Change<span>:</span> 2021-12-02 13<span>:</span>58<span>:</span>10.281221500 +01
 <div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#666>&gt;&gt;</span> <span style=color:#007020;font-weight:700>from</span> <span style=color:#0e84b5;font-weight:700>datetime</span> <span style=color:#007020;font-weight:700>import</span> datetime, timezone
 <span style=color:#666>&gt;&gt;</span> datetime<span style=color:#666>.</span>fromtimestamp(<span style=color:#40a070>1515919184</span>, tz<span style=color:#666>=</span>timezone<span style=color:#666>.</span>utc)
 datetime<span style=color:#666>.</span>datetime(<span style=color:#40a070>2018</span>, <span style=color:#40a070>1</span>, <span style=color:#40a070>14</span>, <span style=color:#40a070>8</span>, <span style=color:#40a070>39</span>, <span style=color:#40a070>44</span>, tzinfo<span style=color:#666>=</span>datetime<span style=color:#666>.</span>timezone<span style=color:#666>.</span>utc)
-</code></pre></div><p>To summarize:</p>
-<table>
-<thead>
-<tr>
-<th>File</th>
-<th>size</th>
-<th>mtime</th>
-<th>mtime (human readable, UTC)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>wordsize.h (PCH)</td>
-<td>327</td>
-<td>1515919184</td>
-<td><code>2018-01-14 08:39:44 +0000</code></td>
-</tr>
-<tr>
-<td>wordsize.h (disk)</td>
-<td>327</td>
-<td>1515922784</td>
-<td><code>2018-01-14 09:39:44 +0000</code></td>
-</tr>
-</tbody>
-</table>
-<p>So the size matches as well as the contents, I&rsquo;ve checked separately. The source files used to build the precompiled header appear to be exactly the same, no <em>real</em> modifications has been made to them. However the <code>mtime</code> is indeed different (the compiler didn&rsquo;t lie).</p>
+</code></pre></div><p>To summarize what we know about both files so far:</p>
+<ul>
+<li><strong>wordsize.h (PCH)</strong>
+<ul>
+<li>size &ndash; 327 bytes</li>
+<li>mtime &ndash; 1515919184 (<code>2018-01-14 08:39:44 +0000</code>)</li>
+</ul>
+</li>
+<li><strong>wordsize.h (disk)</strong>
+<ul>
+<li>size &ndash; 327 bytes</li>
+<li>mtime &ndash; 1515922784 (<code>2018-01-14 09:39:44 +0000</code>)</li>
+</ul>
+</li>
+</ul>
+<p>The file size matches as well as the contents, I&rsquo;ve checked separately. The source files used to build the precompiled header appear to be exactly the same, no <em>real</em> modifications has been made to them. However the <code>mtime</code> is indeed different (the compiler didn&rsquo;t lie).</p>
 <p>Well, I did install a newer version of the SDK recently. The sysroot headers obviously didn&rsquo;t change &ndash; we can see they&rsquo;re are the same. Maybe the <code>mtime</code> got messed up in the newer SDK? Nope, I&rsquo;ve tried installing several different versions, but <code>mtime</code> of that file was always the same.</p>
 <p>It&rsquo;s curious though that the timestamps are different by exactly one hour. When two timestamps are different by exactly N hours programmers usually get real suspicious&mldr;</p>
-<p><img src=its-always-you-three.jpg alt="its always you three meme"></p>
+<img src=its-always-you-three.jpg alt="its always you three meme" style=max-width:500px;width:100%>
 <hr>
 <p>The SDK is distributed via the Windows Installer (MSI). And it turns out, Windows Installer adjusts the modification time of the files according to the local timezone of the target machine! It means that the actual file <code>mtime</code> will be different on different machines depending on their timezone, for example:</p>
 <ul>
@@ -172,7 +162,7 @@ Modify<span>:</span> 2018-01-14 10<span>:</span>39<span>:</span>44.000000000 +01
 Modify<span>:</span> 2018-01-14 10<span>:</span>39<span>:</span>44.000000000 +0300
 </code></pre></div><p>Typically this wouldn&rsquo;t cause an issue &ndash; if local time is always the same, the timestamp will match. But wait-a-minute&mldr; what about the <strong>Daylight Saving Time</strong>? It changes the timezone offset and the files installed after the DST will have different <code>mtime</code> compared to the files installed before the DST.</p>
 <p>I don&rsquo;t know whether it&rsquo;s a bug or a feature, but my guess it&rsquo;s unlikely to be fixed anytime soon because backwards compatibility™. And that means that twice a year our users might need to rebuild their code just because. That&rsquo;s why we can&rsquo;t have nice things ¯\_(ツ)_/¯</p>
-<img src=questioning-my-sanity.jpg alt="questioning my sanity meme" style=max-width:500px>
+<img src=questioning-my-sanity.jpg alt="questioning my sanity meme" style=max-width:500px;width:100%>
 <p>Unfortunately I haven&rsquo;t found a good way to alter this behaviour. <a href="https://www.advancedinstaller.com/forums/viewtopic.php?t=45880">Other people ran into this problem as well</a>, but no solutions have been posted. It&rsquo;s certanly possible to add a custom step to the installer to walk over the files and &ldquo;correct&rdquo; their <code>mtime</code>, but who knows what else might break because of this. If you know a better way, please, send help!</p>
 </div>
 <footer>
