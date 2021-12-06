@@ -35,7 +35,7 @@ Change: 2021-12-02 13:58:10.281221500 +0100
 But surprisingly right after I installed the new SDK, I was getting the same build error too. Oh boy, this is going to be interesting. Down to the rabbit hole!
 
 <!-- I don't know another way to set the max width  -->
-<img src="quick-adventure.jpg" alt="quick adventure meme" style="max-width: 500px;">
+<img src="quick-adventure.jpg" alt="quick adventure meme" style="max-width:500px;width: 100%;">
 
 ---
 
@@ -56,20 +56,22 @@ It's size is `327` bytes (op1), and modification time is `1515919184` (op2), whi
 datetime.datetime(2018, 1, 14, 8, 39, 44, tzinfo=datetime.timezone.utc)
 ```
 
-To summarize:
+To summarize what we know about both files so far:
 
-| File              | size | mtime      | mtime (human readable, UTC) |
-| ----------------- | ---- | ---------- | --------------------------- |
-| wordsize.h (PCH)  | 327  | 1515919184 | `2018-01-14 08:39:44 +0000` |
-| wordsize.h (disk) | 327  | 1515922784 | `2018-01-14 09:39:44 +0000` |
+* **wordsize.h (PCH)**
+  * size -- 327 bytes
+  * mtime -- 1515919184 (`2018-01-14 08:39:44 +0000`)
+* **wordsize.h (disk)**
+  * size -- 327 bytes
+  * mtime -- 1515922784 (`2018-01-14 09:39:44 +0000`)
 
-So the size matches as well as the contents, I've checked separately. The source files used to build the precompiled header appear to be exactly the same, no _real_ modifications has been made to them. However the `mtime` is indeed different (the compiler didn't lie).
+The file size matches as well as the contents, I've checked separately. The source files used to build the precompiled header appear to be exactly the same, no _real_ modifications has been made to them. However the `mtime` is indeed different (the compiler didn't lie).
 
 Well, I did install a newer version of the SDK recently. The sysroot headers obviously didn't change -- we can see they're are the same. Maybe the `mtime` got messed up in the newer SDK? Nope, I've tried installing several different versions, but `mtime` of that file was always the same.
 
 It's curious though that the timestamps are different by exactly one hour. When two timestamps are different by exactly N hours programmers usually get real suspicious...
 
-![its always you three meme](its-always-you-three.jpg)
+<img src="its-always-you-three.jpg" alt="its always you three meme" style="max-width:500px;width: 100%;">
 
 ---
 
@@ -99,6 +101,6 @@ Typically this wouldn't cause an issue -- if local time is always the same, the 
 I don't know whether it's a bug or a feature, but my guess it's unlikely to be fixed anytime soon because backwards compatibility™. And that means that twice a year our users might need to rebuild their code just because. That's why we can't have nice things ¯\\\_(ツ)\_/¯
 
 <!-- I don't know another way to set the max width  -->
-<img src="questioning-my-sanity.jpg" alt="questioning my sanity meme" style="max-width: 500px;">
+<img src="questioning-my-sanity.jpg" alt="questioning my sanity meme" style="max-width:500px;width: 100%;">
 
 Unfortunately I haven't found a good way to alter this behaviour. [Other people ran into this problem as well](https://www.advancedinstaller.com/forums/viewtopic.php?t=45880), but no solutions have been posted. It's certanly possible to add a custom step to the installer to walk over the files and "correct" their `mtime`, but who knows what else might break because of this. If you know a better way, please, send help!
