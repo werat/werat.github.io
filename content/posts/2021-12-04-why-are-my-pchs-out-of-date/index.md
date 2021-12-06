@@ -104,3 +104,9 @@ I don't know whether it's a bug or a feature, but my guess it's unlikely to be f
 <img src="questioning-my-sanity.jpg" alt="questioning my sanity meme" style="max-width:500px;width: 100%;">
 
 Unfortunately I haven't found a good way to alter this behaviour. [Other people ran into this problem as well](https://www.advancedinstaller.com/forums/viewtopic.php?t=45880), but no solutions have been posted. It's certanly possible to add a custom step to the installer to walk over the files and "correct" their `mtime`, but who knows what else might break because of this. If you know a better way, please, send help!
+
+---
+
+Discuss this article on [lobste.rs](https://lobste.rs/s/qisivk/why_are_my_pchs_out_date)
+
+---
