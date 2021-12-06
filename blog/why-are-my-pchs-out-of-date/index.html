@@ -124,15 +124,15 @@ Change<span>:</span> 2021-12-02 13<span>:</span>58<span>:</span>10.281221500 +01
 <div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#666>&gt;&gt;</span> <span style=color:#007020;font-weight:700>from</span> <span style=color:#0e84b5;font-weight:700>datetime</span> <span style=color:#007020;font-weight:700>import</span> datetime, timezone
 <span style=color:#666>&gt;&gt;</span> datetime<span style=color:#666>.</span>fromtimestamp(<span style=color:#40a070>1515919184</span>, tz<span style=color:#666>=</span>timezone<span style=color:#666>.</span>utc)
 datetime<span style=color:#666>.</span>datetime(<span style=color:#40a070>2018</span>, <span style=color:#40a070>1</span>, <span style=color:#40a070>14</span>, <span style=color:#40a070>8</span>, <span style=color:#40a070>39</span>, <span style=color:#40a070>44</span>, tzinfo<span style=color:#666>=</span>datetime<span style=color:#666>.</span>timezone<span style=color:#666>.</span>utc)
-</code></pre></div><p>To summarize what we know about both files so far:</p>
+</code></pre></div><p>To summarize what we know so far:</p>
 <ul>
-<li><strong>wordsize.h (PCH)</strong>
+<li><strong>wordsize.h (from PCH)</strong>
 <ul>
 <li>size &ndash; 327 bytes</li>
 <li>mtime &ndash; 1515919184 (<code>2018-01-14 08:39:44 +0000</code>)</li>
 </ul>
 </li>
-<li><strong>wordsize.h (disk)</strong>
+<li><strong>wordsize.h (on disk)</strong>
 <ul>
 <li>size &ndash; 327 bytes</li>
 <li>mtime &ndash; 1515922784 (<code>2018-01-14 09:39:44 +0000</code>)</li>
