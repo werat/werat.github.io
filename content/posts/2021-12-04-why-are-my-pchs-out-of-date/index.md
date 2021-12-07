@@ -80,7 +80,7 @@ The SDK is distributed via the Windows Installer (MSI). And it turns out, Window
 * Build server has UTC+0, the `mtime` of `wordsize.h` is `2018-01-14 10:00:00`.
 * Developer machine has UTC+1, the `mtime` of `wordsize.h` is `2018-01-14 09:00:00` (!!).
 
-Windows Explorer and other tools (e.g. `stat`) always display the local time, so both build server and the developer machine will show `2018-01-14 10:00:00`, but with different offsets, of course. However Windows Explorer doesn't show offsets or timezone, so for the user will just see the same modification time on both machines.
+Windows Explorer and other tools (e.g. `stat`) always display the local time, so both build server and the developer machine will show `2018-01-14 10:00:00`, but with a different offset, of course. However Windows Explorer doesn't show offsets or timezone, so for the user will just see the same modification time on both machines.
 
 Same files, same installer, but the `mtime` will be different depending on your local timezone:
 
