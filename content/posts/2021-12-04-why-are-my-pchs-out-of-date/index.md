@@ -18,7 +18,7 @@ was built: mtime changed
 
 Hmm, well, it looks like some source files have changed and a simple re-build would fix the issue. However, building Unreal Engine from scratch takes **considerable** time, so you can understand why we'd like to avoid that.
 
-The toolchain and the sysroot are distributed via the SDK™ and the colleague claimed that the error happened after they've installed a new version of the SDK. I was fairly sure that the above mentioned headers files didn't actually change -- it's a toolchain sysroot, it hasn't been touched in years. Indeed, a simple `stat` shows that the modification time goes back to 2018:
+The toolchain and the sysroot are distributed via the SDK™ and the colleague claimed that the error happened after they've installed a new version of the SDK. I was fairly sure that the above mentioned header files didn't actually change -- it's a toolchain sysroot, it hasn't been touched in years. Indeed, a simple `stat` shows that the modification time goes back to 2018:
 
 ```powershell
 > stat "D:\toolchain\sysroot\usr\include\x86_64-linux-gnu\bits\wordsize.h"
