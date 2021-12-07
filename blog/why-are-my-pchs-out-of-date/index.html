@@ -149,7 +149,7 @@ datetime<span style=color:#666>.</span>datetime(<span style=color:#40a070>2018</
 <li>Build server has UTC+0, the <code>mtime</code> of <code>wordsize.h</code> is <code>2018-01-14 10:00:00</code>.</li>
 <li>Developer machine has UTC+1, the <code>mtime</code> of <code>wordsize.h</code> is <code>2018-01-14 09:00:00</code> (!!).</li>
 </ul>
-<p>Windows Explorer and other tools (e.g. <code>stat</code>) always display the local time, so both build server and the developer machine will show <code>2018-01-14 10:00:00</code>, but with different offsets, of course. However Windows Explorer doesn&rsquo;t show offsets or timezone, so for the user will just see the same modification time on both machines.</p>
+<p>Windows Explorer and other tools (e.g. <code>stat</code>) always display the local time, so both build server and the developer machine will show <code>2018-01-14 10:00:00</code>, but with a different offset, of course. However Windows Explorer doesn&rsquo;t show offsets or timezone, so for the user will just see the same modification time on both machines.</p>
 <p>Same files, same installer, but the <code>mtime</code> will be different depending on your local timezone:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-powershell data-lang=powershell><span style=color:#60a0b0;font-style:italic># Let&#39;s say we&#39;re in Berlin, UTC+1</span>
 &gt; stat <span style=color:#4070a0>&#34;D:\toolchain\sysroot\usr\include\x86_64-linux-gnu\bits\wordsize.h&#34;</span>
