@@ -162,7 +162,6 @@ Modify<span>:</span> 2018-01-14 10<span>:</span>39<span>:</span>44.000000000 +01
 Modify<span>:</span> 2018-01-14 10<span>:</span>39<span>:</span>44.000000000 +0300
 </code></pre></div><p>Typically this wouldn&rsquo;t cause an issue &ndash; if local time is always the same, the timestamp will match. But wait-a-minute&mldr; what about the <strong>Daylight Saving Time</strong>? It changes the timezone offset and the files installed after the DST will have different <code>mtime</code> compared to the files installed before the DST.</p>
 <p>I don&rsquo;t know whether it&rsquo;s a bug or a feature, but my guess it&rsquo;s unlikely to be fixed anytime soon because backwards compatibility™. And that means that twice a year our users might need to rebuild their code just because. That&rsquo;s why we can&rsquo;t have nice things ¯\_(ツ)_/¯</p>
-<img src=questioning-my-sanity.jpg alt="questioning my sanity meme" style=max-width:500px;width:100%>
 <p>Unfortunately I haven&rsquo;t found a good way to alter this behaviour. <a href="https://www.advancedinstaller.com/forums/viewtopic.php?t=45880">Other people ran into this problem as well</a>, but no solutions have been posted. It&rsquo;s certanly possible to add a custom step to the installer to walk over the files and &ldquo;correct&rdquo; their <code>mtime</code>, but who knows what else might break because of this. If you know a better way, please, send help!</p>
 <hr>
 <p>Discuss this article on <a href=https://lobste.rs/s/qisivk/why_are_my_pchs_out_date>lobste.rs</a></p>
