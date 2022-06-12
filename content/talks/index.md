@@ -1,4 +1,4 @@
-# Talks from conferences and meetupssss
+# Talks from conferences and meetups
 
 ## # Building a faster expression evaluator for LLDB
 
