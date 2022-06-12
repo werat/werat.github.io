@@ -1,210 +1,40 @@
-<!doctype html><html lang=en>
-<head>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta http-equiv=content-language content="en">
-<meta name=color-scheme content="light dark">
-<meta name=author content="Andy Hippo">
-<meta name=description content="If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:
- connect to some remote machine via ssh and create a tmux session use it happily detach from tmux and disconnect from server connect again (e.g. next day) and attach to the tmux session push something to git (or connect to another server)&mldr; &mldr; Permission denied (publickey).  Let&rsquo;s discuss why this is happening.">
-<meta name=keywords content="blog,developer,personal">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Happy ssh agent forwarding for tmux/screen">
-<meta name=twitter:description content="If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:
- connect to some remote machine via ssh and create a tmux session use it happily detach from tmux and disconnect from server connect again (e.g. next day) and attach to the tmux session push something to git (or connect to another server)&mldr; &mldr; Permission denied (publickey).  Let&rsquo;s discuss why this is happening.">
-<meta property="og:title" content="Happy ssh agent forwarding for tmux/screen">
-<meta property="og:description" content="If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:
- connect to some remote machine via ssh and create a tmux session use it happily detach from tmux and disconnect from server connect again (e.g. next day) and attach to the tmux session push something to git (or connect to another server)&mldr; &mldr; Permission denied (publickey).  Let&rsquo;s discuss why this is happening.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://werat.dev/blog/happy-ssh-agent-forwarding/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2017-02-04T11:55:00+03:00">
-<meta property="article:modified_time" content="2017-02-04T11:55:00+03:00">
-<title>
-Happy ssh agent forwarding for tmux/screen · Reboot and Shine
-</title>
-<link rel=canonical href=https://werat.dev/blog/happy-ssh-agent-forwarding/>
-<link rel=preload href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as=font type=font/woff2 crossorigin>
-<link rel=stylesheet href=/css/coder.min.34dfa7b2f5cdeb0f5302b2628f4a7a4bfe88a2431e1397ee4ec605c56ab69701.css integrity="sha256-NN+nsvXN6w9TArJij0p6S/6IokMeE5fuTsYFxWq2lwE=" crossorigin=anonymous media=screen>
-<link rel=stylesheet href=/css/custom.css>
-<link rel=icon type=image/png href=/img/logo-avatar-32.png sizes=32x32>
-<link rel=icon type=image/png href=/img/logo-avatar-16.png sizes=16x16>
-<link rel=apple-touch-icon href=/img/logo-avatar.jpg>
-<link rel=apple-touch-icon sizes=180x180 href=/img/logo-avatar.jpg>
-<meta name=generator content="Hugo 0.92.0">
-</head>
-<body class="preload-transitions colorscheme-light">
-<main class=wrapper>
-<nav class=navigation>
-<section class=container>
-<a class=navigation-title href=/>
-Reboot and Shine
-</a>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=content-language content="en"><meta name=color-scheme content="light dark"><meta name=author content="Andy Hippo"><meta name=description content="If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:
+connect to some remote machine via ssh and create a tmux session use it happily detach from tmux and disconnect from server connect again (e.g. next day) and attach to the tmux session push something to git (or connect to another server)&mldr; &mldr; Permission denied (publickey). Let&rsquo;s discuss why this is happening. The magic behind ssh forwarding is quite simple: ssh-agent creates a socket (on linux usually something like /tmp/ssh-hRNwjA1342/agent."><meta name=keywords content="blog,developer,personal"><meta name=twitter:card content="summary"><meta name=twitter:title content="Happy ssh agent forwarding for tmux/screen"><meta name=twitter:description content="If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:
+connect to some remote machine via ssh and create a tmux session use it happily detach from tmux and disconnect from server connect again (e.g. next day) and attach to the tmux session push something to git (or connect to another server)&mldr; &mldr; Permission denied (publickey). Let&rsquo;s discuss why this is happening. The magic behind ssh forwarding is quite simple: ssh-agent creates a socket (on linux usually something like /tmp/ssh-hRNwjA1342/agent."><meta property="og:title" content="Happy ssh agent forwarding for tmux/screen"><meta property="og:description" content="If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:
+connect to some remote machine via ssh and create a tmux session use it happily detach from tmux and disconnect from server connect again (e.g. next day) and attach to the tmux session push something to git (or connect to another server)&mldr; &mldr; Permission denied (publickey). Let&rsquo;s discuss why this is happening. The magic behind ssh forwarding is quite simple: ssh-agent creates a socket (on linux usually something like /tmp/ssh-hRNwjA1342/agent."><meta property="og:type" content="article"><meta property="og:url" content="https://werat.dev/blog/happy-ssh-agent-forwarding/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2017-02-04T11:55:00+03:00"><meta property="article:modified_time" content="2017-02-04T11:55:00+03:00"><title>Happy ssh agent forwarding for tmux/screen · Reboot and Shine</title><link rel=canonical href=https://werat.dev/blog/happy-ssh-agent-forwarding/><link rel=preload href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as=font type=font/woff2 crossorigin><link rel=stylesheet href=/css/coder.min.34dfa7b2f5cdeb0f5302b2628f4a7a4bfe88a2431e1397ee4ec605c56ab69701.css integrity="sha256-NN+nsvXN6w9TArJij0p6S/6IokMeE5fuTsYFxWq2lwE=" crossorigin=anonymous media=screen><link rel=stylesheet href=/css/custom.css><link rel=icon type=image/png href=/img/logo-avatar-32.png sizes=32x32><link rel=icon type=image/png href=/img/logo-avatar-16.png sizes=16x16><link rel=apple-touch-icon href=/img/logo-avatar.jpg><link rel=apple-touch-icon sizes=180x180 href=/img/logo-avatar.jpg><meta name=generator content="Hugo 0.100.2"></head><body class="preload-transitions colorscheme-light"><main class=wrapper><nav class=navigation><section class=container><a class=navigation-title href=/>Reboot and Shine</a>
 <input type=checkbox id=menu-toggle>
-<label class="menu-button float-right" for=menu-toggle>
-<i class="fa fa-bars fa-fw" aria-hidden=true></i>
-</label>
-<ul class=navigation-list>
-<li class=navigation-item>
-<a class=navigation-link href=/posts/>Blog</a>
-</li>
-<li class=navigation-item>
-<a class=navigation-link href=/talks/>Talks</a>
-</li>
-</ul>
-</section>
-</nav>
-<div class=content>
-<section class="container post">
-<article>
-<header>
-<div class=post-title>
-<h1 class=title>
-<a class=title-link href=https://werat.dev/blog/happy-ssh-agent-forwarding/>
-Happy ssh agent forwarding for tmux/screen
-</a>
-</h1>
-</div>
-<div class=post-meta>
-<div class=date>
-<span class=posted-on>
-<i class="fa fa-calendar" aria-hidden=true></i>
-<time datetime=2017-02-04T11:55:00+03:00>
-February 4, 2017
-</time>
-</span>
-<span class=reading-time>
-<i class="fa fa-clock-o" aria-hidden=true></i>
-4-minute read
-</span>
-</div>
-<div class=tags>
-<i class="fa fa-tag" aria-hidden=true></i>
-<span class=tag>
-<a href=/tags/tmux/>tmux</a>
-</span>
+<label class="menu-button float-right" for=menu-toggle><i class="fa fa-bars fa-fw" aria-hidden=true></i></label><ul class=navigation-list><li class=navigation-item><a class=navigation-link href=/posts/>Blog</a></li><li class=navigation-item><a class=navigation-link href=/talks/>Talks</a></li></ul></section></nav><div class=content><section class="container post"><article><header><div class=post-title><h1 class=title><a class=title-link href=https://werat.dev/blog/happy-ssh-agent-forwarding/>Happy ssh agent forwarding for tmux/screen</a></h1></div><div class=post-meta><div class=date><span class=posted-on><i class="fa fa-calendar" aria-hidden=true></i>
+<time datetime=2017-02-04T11:55:00+03:00>February 4, 2017</time></span>
+<span class=reading-time><i class="fa fa-clock-o" aria-hidden=true></i>
+4-minute read</span></div><div class=tags><i class="fa fa-tag" aria-hidden=true></i>
+<span class=tag><a href=/tags/tmux/>tmux</a></span>
 <span class=separator>•</span>
-<span class=tag>
-<a href=/tags/ssh/>ssh</a>
-</span>
+<span class=tag><a href=/tags/ssh/>ssh</a></span>
 <span class=separator>•</span>
-<span class=tag>
-<a href=/tags/ssh-forwarding/>ssh-forwarding</a>
-</span></div>
-</div>
-</header>
-<div>
-<p>If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:</p>
-<ul>
-<li>connect to some remote machine via ssh and create a tmux session</li>
-<li>use it happily</li>
-<li>detach from tmux and disconnect from server</li>
-<li>connect again (e.g. next day) and attach to the tmux session</li>
-<li>push something to git (or connect to another server)&mldr;</li>
-<li>&mldr;</li>
-<li><code>Permission denied (publickey).</code></li>
-</ul>
-<p>Let&rsquo;s discuss why this is happening. The magic behind ssh forwarding is quite simple: ssh-agent creates a socket (on linux usually something like <code>/tmp/ssh-hRNwjA1342/agent.1342</code>) which is used by other applications to communicate with ssh-agent. Obviously these applications need a way to find this socket, so ssh-agent also sets an environment variable <code>SSH_AUTH_SOCK</code>, which contains path to the socket.</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>&gt; env | grep SSH_
-<span style=color:#bb60d5>SSH_AUTH_SOCK</span><span style=color:#666>=</span>/private/tmp/com.apple.launchd.4ymgbbAxhL/Listeners
-</code></pre></div><p>When you create a new tmux session environment variables from current shell are captured and later used for every new window/pane. Thus all your panes inside tmux will have the same value of <code>SSH_AUTH_SOCK</code>. When you disconnect from server ssh connection terminates and socket is deleted. When you reconnect <em>a new socket is created</em> (and <code>SSH_AUTH_SOCK</code> now points to it), but all your panes inside tmux <em>still have the old value</em>.</p>
-<p>What first comes to mind is to find the path of a new socket and export it in broken panes. You can totally do it, but this is pain. For new panes we can tell tmux to reload environment variables. To do so just add the following lines to your <code>~/.tmux.conf</code> file:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=color:#007020>set</span> -g update-environment <span style=color:#4070a0>&#34;SSH_AUTH_SOCK&#34;</span>
-</code></pre></div><p>This is clearly a half measure, because you&rsquo;ll still have all your existing panes being broken every time the ssh connection dies. We might want to modify <code>SSH_AUTH_SOCK</code> of existing panes, but there is no good (or even bad, but portable) way to do it. Luckily there is another way.</p>
-<p>As I said, <code>SSH_AUTH_SOCK</code> points to the current ssh-agent socket and this socket dies, when the connection is terminated. The last thing is a problem, and all problems in computer science can be solved by another level of indirection. Let&rsquo;s point <code>SSH_AUTH_SOCK</code> to <em>a symlink</em> which is pointing to a ssh-agent socket; this way all panes will have a valid value in <code>SSH_AUTH_SOCK</code>. For <code>tmux</code> this can be done also via config<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>&gt; cat ~/.tmux.conf
-set-environment -g <span style=color:#4070a0>&#39;SSH_AUTH_SOCK&#39;</span> ~/.ssh/ssh_auth_sock
-</code></pre></div><p>If you prefer <code>screen</code> (which is weird), you should use <code>~/.screenrc</code><sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup>:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>&gt; cat ~/.screenrc
-setenv SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
-</code></pre></div><p>The only problem is to keep the symlink valid. This is where <code>~/.ssh/rc</code> comes out. This script is invoked by the SSH server for each incoming SSH connection<sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup>.</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>&gt; cat ~/.ssh/rc
-<span style=color:#007020;font-weight:700>if</span> <span style=color:#666>[</span> -S <span style=color:#4070a0>&#34;</span><span style=color:#bb60d5>$SSH_AUTH_SOCK</span><span style=color:#4070a0>&#34;</span> <span style=color:#666>]</span>; <span style=color:#007020;font-weight:700>then</span>
-    ln -sf <span style=color:#bb60d5>$SSH_AUTH_SOCK</span> ~/.ssh/ssh_auth_sock
-<span style=color:#007020;font-weight:700>fi</span>
-</code></pre></div><p>Great, now for every new ssh connection (and if ssh forwarding is enabled) we&rsquo;ll update the symlink to the new value. And everything will work fine until this connection is terminated.</p>
-<p>I personally lived with this solution for quite a long time, until I&rsquo;ve started to use lsyncd<sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup> for syncing my source code with remote machines. The thing is lsyncd uses rsync for syncing files and this means it creates new ssh connections once in a while. The problem is that when a new connection is created <em>it updates your symlink</em>. And when it dies the symlink becomes broken.</p>
-<p>To fix this problem I told <code>/.ssh/rc</code> not to modify the symlink <em>if current is still alive</em>. This way new ssh connections will not touch the symlink until the connection which created it is still alive.</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>&gt; cat ~/.ssh/rc
-<span style=color:#007020;font-weight:700>if</span> <span style=color:#666>[</span> ! -S ~/.ssh/ssh_auth_sock <span style=color:#666>]</span> <span style=color:#666>&amp;&amp;</span> <span style=color:#666>[</span> -S <span style=color:#4070a0>&#34;</span><span style=color:#bb60d5>$SSH_AUTH_SOCK</span><span style=color:#4070a0>&#34;</span> <span style=color:#666>]</span>; <span style=color:#007020;font-weight:700>then</span>
-    ln -sf <span style=color:#bb60d5>$SSH_AUTH_SOCK</span> ~/.ssh/ssh_auth_sock
-<span style=color:#007020;font-weight:700>fi</span>
-</code></pre></div><h2 id=summary>
-Summary
-<a class=heading-link href=#summary>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<ol>
-<li>Setup the <code>~/.ssh/rc</code> to keep the <code>~/.ssh/ssh_auth_sock</code> symlink valid</li>
-<li>Setup the <code>~/.tmux.conf</code> to make <code>SSH_AUTH_SOCK</code> point to the <code>~/.ssh/ssh_auth_sock</code></li>
-<li>&mldr;</li>
-<li>Profit</li>
-</ol>
-<h2 id=potential-issues>
-Potential issues
-<a class=heading-link href=#potential-issues>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<h3 id=sshrc-and-x11-forwarding>
-SSHRC and X11 forwarding
-<a class=heading-link href=#sshrc-and-x11-forwarding>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h3>
-<blockquote>
-<p>Update 2020-09-05</p>
-</blockquote>
-<p>As noted by <a href=https://disqus.com/by/disqus_QJThfDd5Ae/>Маятчи Ҁязиде&rsquo;мѧи</a> in the <a href=#comment-5047083317>comments</a>, you need to call <code>xauth</code> from your <code>~/.ssh/rc</code>, otherwise X11 forwarding will not work<sup id=fnref:5><a href=#fn:5 class=footnote-ref role=doc-noteref>5</a></sup>.</p>
-<h2 id=links>
-Links
-<a class=heading-link href=#links>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<section class=footnotes role=doc-endnotes>
-<hr>
-<ol>
-<li id=fn:1 role=doc-endnote>
-<p><a href=http://man7.org/linux/man-pages/man1/tmux.1.html#ENVIRONMENT>http://man7.org/linux/man-pages/man1/tmux.1.html#ENVIRONMENT</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
-</li>
-<li id=fn:2 role=doc-endnote>
-<p><a href=https://www.gnu.org/software/screen/manual/screen.html#Setenv>https://www.gnu.org/software/screen/manual/screen.html#Setenv</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
-</li>
-<li id=fn:3 role=doc-endnote>
-<p><a href=http://docstore.mik.ua/orelly/networking_2ndEd/ssh/ch08_04.htm>http://docstore.mik.ua/orelly/networking_2ndEd/ssh/ch08_04.htm</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
-</li>
-<li id=fn:4 role=doc-endnote>
-<p><a href=https://github.com/axkibe/lsyncd>https://github.com/axkibe/lsyncd</a>&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
-</li>
-<li id=fn:5 role=doc-endnote>
-<p><a href=https://www.freebsd.org/cgi/man.cgi?sshd(8)#SSHRC>https://www.freebsd.org/cgi/man.cgi?sshd(8)#SSHRC</a>&#160;<a href=#fnref:5 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
-</li>
-</ol>
-</section>
-</div>
-<footer>
-<div id=disqus_thread></div>
-<script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//werat-github-io.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script>
-<noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript>
-<a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a>
-</footer>
-</article>
-</section>
-</div>
-<footer class=footer>
-<section class=container>
-©
+<span class=tag><a href=/tags/ssh-forwarding/>ssh-forwarding</a></span></div></div></header><div><p>If you often use ssh+tmux combination and ssh keys forwarding, you&rsquo;ve definitely been in an unpleasant situation:</p><ul><li>connect to some remote machine via ssh and create a tmux session</li><li>use it happily</li><li>detach from tmux and disconnect from server</li><li>connect again (e.g. next day) and attach to the tmux session</li><li>push something to git (or connect to another server)&mldr;</li><li>&mldr;</li><li><code>Permission denied (publickey).</code></li></ul><p>Let&rsquo;s discuss why this is happening. The magic behind ssh forwarding is quite simple: ssh-agent creates a socket (on linux usually something like <code>/tmp/ssh-hRNwjA1342/agent.1342</code>) which is used by other applications to communicate with ssh-agent. Obviously these applications need a way to find this socket, so ssh-agent also sets an environment variable <code>SSH_AUTH_SOCK</code>, which contains path to the socket.</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>&gt; env | grep SSH_
+</span></span><span style=display:flex><span><span style=color:#bb60d5>SSH_AUTH_SOCK</span><span style=color:#666>=</span>/private/tmp/com.apple.launchd.4ymgbbAxhL/Listeners
+</span></span></code></pre></div><p>When you create a new tmux session environment variables from current shell are captured and later used for every new window/pane. Thus all your panes inside tmux will have the same value of <code>SSH_AUTH_SOCK</code>. When you disconnect from server ssh connection terminates and socket is deleted. When you reconnect <em>a new socket is created</em> (and <code>SSH_AUTH_SOCK</code> now points to it), but all your panes inside tmux <em>still have the old value</em>.</p><p>What first comes to mind is to find the path of a new socket and export it in broken panes. You can totally do it, but this is pain. For new panes we can tell tmux to reload environment variables. To do so just add the following lines to your <code>~/.tmux.conf</code> file:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#007020>set</span> -g update-environment <span style=color:#4070a0>&#34;SSH_AUTH_SOCK&#34;</span>
+</span></span></code></pre></div><p>This is clearly a half measure, because you&rsquo;ll still have all your existing panes being broken every time the ssh connection dies. We might want to modify <code>SSH_AUTH_SOCK</code> of existing panes, but there is no good (or even bad, but portable) way to do it. Luckily there is another way.</p><p>As I said, <code>SSH_AUTH_SOCK</code> points to the current ssh-agent socket and this socket dies, when the connection is terminated. The last thing is a problem, and all problems in computer science can be solved by another level of indirection. Let&rsquo;s point <code>SSH_AUTH_SOCK</code> to <em>a symlink</em> which is pointing to a ssh-agent socket; this way all panes will have a valid value in <code>SSH_AUTH_SOCK</code>. For <code>tmux</code> this can be done also via config<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>&gt; cat ~/.tmux.conf
+</span></span><span style=display:flex><span>set-environment -g <span style=color:#4070a0>&#39;SSH_AUTH_SOCK&#39;</span> ~/.ssh/ssh_auth_sock
+</span></span></code></pre></div><p>If you prefer <code>screen</code> (which is weird), you should use <code>~/.screenrc</code><sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup>:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>&gt; cat ~/.screenrc
+</span></span><span style=display:flex><span>setenv SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
+</span></span></code></pre></div><p>The only problem is to keep the symlink valid. This is where <code>~/.ssh/rc</code> comes out. This script is invoked by the SSH server for each incoming SSH connection<sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup>.</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>&gt; cat ~/.ssh/rc
+</span></span><span style=display:flex><span><span style=color:#007020;font-weight:700>if</span> <span style=color:#666>[</span> -S <span style=color:#4070a0>&#34;</span><span style=color:#bb60d5>$SSH_AUTH_SOCK</span><span style=color:#4070a0>&#34;</span> <span style=color:#666>]</span>; <span style=color:#007020;font-weight:700>then</span>
+</span></span><span style=display:flex><span>    ln -sf <span style=color:#bb60d5>$SSH_AUTH_SOCK</span> ~/.ssh/ssh_auth_sock
+</span></span><span style=display:flex><span><span style=color:#007020;font-weight:700>fi</span>
+</span></span></code></pre></div><p>Great, now for every new ssh connection (and if ssh forwarding is enabled) we&rsquo;ll update the symlink to the new value. And everything will work fine until this connection is terminated.</p><p>I personally lived with this solution for quite a long time, until I&rsquo;ve started to use lsyncd<sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup> for syncing my source code with remote machines. The thing is lsyncd uses rsync for syncing files and this means it creates new ssh connections once in a while. The problem is that when a new connection is created <em>it updates your symlink</em>. And when it dies the symlink becomes broken.</p><p>To fix this problem I told <code>/.ssh/rc</code> not to modify the symlink <em>if current is still alive</em>. This way new ssh connections will not touch the symlink until the connection which created it is still alive.</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>&gt; cat ~/.ssh/rc
+</span></span><span style=display:flex><span><span style=color:#007020;font-weight:700>if</span> <span style=color:#666>[</span> ! -S ~/.ssh/ssh_auth_sock <span style=color:#666>]</span> <span style=color:#666>&amp;&amp;</span> <span style=color:#666>[</span> -S <span style=color:#4070a0>&#34;</span><span style=color:#bb60d5>$SSH_AUTH_SOCK</span><span style=color:#4070a0>&#34;</span> <span style=color:#666>]</span>; <span style=color:#007020;font-weight:700>then</span>
+</span></span><span style=display:flex><span>    ln -sf <span style=color:#bb60d5>$SSH_AUTH_SOCK</span> ~/.ssh/ssh_auth_sock
+</span></span><span style=display:flex><span><span style=color:#007020;font-weight:700>fi</span>
+</span></span></code></pre></div><h2 id=summary>Summary
+<a class=heading-link href=#summary><i class="fa fa-link" aria-hidden=true></i></a></h2><ol><li>Setup the <code>~/.ssh/rc</code> to keep the <code>~/.ssh/ssh_auth_sock</code> symlink valid</li><li>Setup the <code>~/.tmux.conf</code> to make <code>SSH_AUTH_SOCK</code> point to the <code>~/.ssh/ssh_auth_sock</code></li><li>&mldr;</li><li>Profit</li></ol><h2 id=potential-issues>Potential issues
+<a class=heading-link href=#potential-issues><i class="fa fa-link" aria-hidden=true></i></a></h2><h3 id=sshrc-and-x11-forwarding>SSHRC and X11 forwarding
+<a class=heading-link href=#sshrc-and-x11-forwarding><i class="fa fa-link" aria-hidden=true></i></a></h3><blockquote><p>Update 2020-09-05</p></blockquote><p>As noted by <a href=https://disqus.com/by/disqus_QJThfDd5Ae/>Маятчи Ҁязиде&rsquo;мѧи</a> in the <a href=#comment-5047083317>comments</a>, you need to call <code>xauth</code> from your <code>~/.ssh/rc</code>, otherwise X11 forwarding will not work<sup id=fnref:5><a href=#fn:5 class=footnote-ref role=doc-noteref>5</a></sup>.</p><h2 id=links>Links
+<a class=heading-link href=#links><i class="fa fa-link" aria-hidden=true></i></a></h2><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p><a href=http://man7.org/linux/man-pages/man1/tmux.1.html#ENVIRONMENT>http://man7.org/linux/man-pages/man1/tmux.1.html#ENVIRONMENT</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:2><p><a href=https://www.gnu.org/software/screen/manual/screen.html#Setenv>https://www.gnu.org/software/screen/manual/screen.html#Setenv</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:3><p><a href=http://docstore.mik.ua/orelly/networking_2ndEd/ssh/ch08_04.htm>http://docstore.mik.ua/orelly/networking_2ndEd/ssh/ch08_04.htm</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:4><p><a href=https://github.com/axkibe/lsyncd>https://github.com/axkibe/lsyncd</a>&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:5><p><a href=https://www.freebsd.org/cgi/man.cgi?sshd(8)#SSHRC>https://www.freebsd.org/cgi/man.cgi?sshd(8)#SSHRC</a>&#160;<a href=#fnref:5 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></div><footer><div id=disqus_thread></div><script type=application/javascript>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var t=document,e=t.createElement('script');e.async=!0,e.src='//werat-github-io.disqus.com/embed.js',e.setAttribute('data-timestamp',+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></footer></article></section></div><footer class=footer><section class=container>©
 2017 -
 2022
 Andy Hippo
 ·
-Powered by <a href=https://gohugo.io/>Hugo</a> & <a href=https://github.com/luizdepra/hugo-coder/>Coder</a>.
-</section>
-</footer>
-</main>
-<script src=/js/coder.min.03b17769f4f91ae35667e1f2a1ca8c16f50562576cf90ff32b3179926914daa5.js integrity="sha256-A7F3afT5GuNWZ+HyocqMFvUFYlds+Q/zKzF5kmkU2qU="></script>
+Powered by <a href=https://gohugo.io/>Hugo</a> & <a href=https://github.com/luizdepra/hugo-coder/>Coder</a>.</section></footer></main><script src=/js/coder.min.1e7ed4c0db4e8708b345265f5fcd5fbbd6753672f2f79f33c5dacbd22f524208.js integrity="sha256-Hn7UwNtOhwizRSZfX81fu9Z1NnLy958zxdrL0i9SQgg="></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-91441325-1"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-91441325-1')</script>
-</body>
-</html>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-91441325-1')</script></body></html>

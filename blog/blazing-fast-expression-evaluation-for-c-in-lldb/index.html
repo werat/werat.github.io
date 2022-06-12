@@ -1,320 +1,121 @@
-<!doctype html><html lang=en>
-<head>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta http-equiv=content-language content="en">
-<meta name=color-scheme content="light dark">
-<meta name=author content="Andy Hippo">
-<meta name=description content="Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like print/call in GDB or expr/p in LLDB. It is also used extensively by the IDEs to support typical UI workflows: Immediate Window, Watch Window, hovering over a variable, custom data visualizers (see NatVis), etc.">
-<meta name=keywords content="blog,developer,personal">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Blazing fast expression evaluation for C++ in LLDB">
-<meta name=twitter:description content="Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like print/call in GDB or expr/p in LLDB. It is also used extensively by the IDEs to support typical UI workflows: Immediate Window, Watch Window, hovering over a variable, custom data visualizers (see NatVis), etc.">
-<meta property="og:title" content="Blazing fast expression evaluation for C++ in LLDB">
-<meta property="og:description" content="Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like print/call in GDB or expr/p in LLDB. It is also used extensively by the IDEs to support typical UI workflows: Immediate Window, Watch Window, hovering over a variable, custom data visualizers (see NatVis), etc.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://werat.dev/blog/blazing-fast-expression-evaluation-for-c-in-lldb/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2021-03-23T00:00:00+00:00">
-<meta property="article:modified_time" content="2021-03-23T00:00:00+00:00">
-<title>
-Blazing fast expression evaluation for C++ in LLDB · Reboot and Shine
-</title>
-<link rel=canonical href=https://werat.dev/blog/blazing-fast-expression-evaluation-for-c-in-lldb/>
-<link rel=preload href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as=font type=font/woff2 crossorigin>
-<link rel=stylesheet href=/css/coder.min.34dfa7b2f5cdeb0f5302b2628f4a7a4bfe88a2431e1397ee4ec605c56ab69701.css integrity="sha256-NN+nsvXN6w9TArJij0p6S/6IokMeE5fuTsYFxWq2lwE=" crossorigin=anonymous media=screen>
-<link rel=stylesheet href=/css/custom.css>
-<link rel=icon type=image/png href=/img/logo-avatar-32.png sizes=32x32>
-<link rel=icon type=image/png href=/img/logo-avatar-16.png sizes=16x16>
-<link rel=apple-touch-icon href=/img/logo-avatar.jpg>
-<link rel=apple-touch-icon sizes=180x180 href=/img/logo-avatar.jpg>
-<meta name=generator content="Hugo 0.92.0">
-</head>
-<body class="preload-transitions colorscheme-light">
-<main class=wrapper>
-<nav class=navigation>
-<section class=container>
-<a class=navigation-title href=/>
-Reboot and Shine
-</a>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=content-language content="en"><meta name=color-scheme content="light dark"><meta name=author content="Andy Hippo"><meta name=description content="Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like print/call in GDB or expr/p in LLDB. It is also used extensively by the IDEs to support typical UI workflows: Immediate Window, Watch Window, hovering over a variable, custom data visualizers (see NatVis), etc."><meta name=keywords content="blog,developer,personal"><meta name=twitter:card content="summary"><meta name=twitter:title content="Blazing fast expression evaluation for C++ in LLDB"><meta name=twitter:description content="Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like print/call in GDB or expr/p in LLDB. It is also used extensively by the IDEs to support typical UI workflows: Immediate Window, Watch Window, hovering over a variable, custom data visualizers (see NatVis), etc."><meta property="og:title" content="Blazing fast expression evaluation for C++ in LLDB"><meta property="og:description" content="Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like print/call in GDB or expr/p in LLDB. It is also used extensively by the IDEs to support typical UI workflows: Immediate Window, Watch Window, hovering over a variable, custom data visualizers (see NatVis), etc."><meta property="og:type" content="article"><meta property="og:url" content="https://werat.dev/blog/blazing-fast-expression-evaluation-for-c-in-lldb/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-03-23T00:00:00+00:00"><meta property="article:modified_time" content="2021-03-23T00:00:00+00:00"><title>Blazing fast expression evaluation for C++ in LLDB · Reboot and Shine</title><link rel=canonical href=https://werat.dev/blog/blazing-fast-expression-evaluation-for-c-in-lldb/><link rel=preload href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as=font type=font/woff2 crossorigin><link rel=stylesheet href=/css/coder.min.34dfa7b2f5cdeb0f5302b2628f4a7a4bfe88a2431e1397ee4ec605c56ab69701.css integrity="sha256-NN+nsvXN6w9TArJij0p6S/6IokMeE5fuTsYFxWq2lwE=" crossorigin=anonymous media=screen><link rel=stylesheet href=/css/custom.css><link rel=icon type=image/png href=/img/logo-avatar-32.png sizes=32x32><link rel=icon type=image/png href=/img/logo-avatar-16.png sizes=16x16><link rel=apple-touch-icon href=/img/logo-avatar.jpg><link rel=apple-touch-icon sizes=180x180 href=/img/logo-avatar.jpg><meta name=generator content="Hugo 0.100.2"></head><body class="preload-transitions colorscheme-light"><main class=wrapper><nav class=navigation><section class=container><a class=navigation-title href=/>Reboot and Shine</a>
 <input type=checkbox id=menu-toggle>
-<label class="menu-button float-right" for=menu-toggle>
-<i class="fa fa-bars fa-fw" aria-hidden=true></i>
-</label>
-<ul class=navigation-list>
-<li class=navigation-item>
-<a class=navigation-link href=/posts/>Blog</a>
-</li>
-<li class=navigation-item>
-<a class=navigation-link href=/talks/>Talks</a>
-</li>
-</ul>
-</section>
-</nav>
-<div class=content>
-<section class="container post">
-<article>
-<header>
-<div class=post-title>
-<h1 class=title>
-<a class=title-link href=https://werat.dev/blog/blazing-fast-expression-evaluation-for-c-in-lldb/>
-Blazing fast expression evaluation for C++ in LLDB
-</a>
-</h1>
-</div>
-<div class=post-meta>
-<div class=date>
-<span class=posted-on>
-<i class="fa fa-calendar" aria-hidden=true></i>
-<time datetime=2021-03-23T00:00:00Z>
-March 23, 2021
-</time>
-</span>
-<span class=reading-time>
-<i class="fa fa-clock-o" aria-hidden=true></i>
-13-minute read
-</span>
-</div>
-<div class=tags>
-<i class="fa fa-tag" aria-hidden=true></i>
-<span class=tag>
-<a href=/tags/lldb/>lldb</a>
-</span>
+<label class="menu-button float-right" for=menu-toggle><i class="fa fa-bars fa-fw" aria-hidden=true></i></label><ul class=navigation-list><li class=navigation-item><a class=navigation-link href=/posts/>Blog</a></li><li class=navigation-item><a class=navigation-link href=/talks/>Talks</a></li></ul></section></nav><div class=content><section class="container post"><article><header><div class=post-title><h1 class=title><a class=title-link href=https://werat.dev/blog/blazing-fast-expression-evaluation-for-c-in-lldb/>Blazing fast expression evaluation for C++ in LLDB</a></h1></div><div class=post-meta><div class=date><span class=posted-on><i class="fa fa-calendar" aria-hidden=true></i>
+<time datetime=2021-03-23T00:00:00Z>March 23, 2021</time></span>
+<span class=reading-time><i class="fa fa-clock-o" aria-hidden=true></i>
+13-minute read</span></div><div class=tags><i class="fa fa-tag" aria-hidden=true></i>
+<span class=tag><a href=/tags/lldb/>lldb</a></span>
 <span class=separator>•</span>
-<span class=tag>
-<a href=/tags/debugging/>debugging</a>
-</span>
+<span class=tag><a href=/tags/debugging/>debugging</a></span>
 <span class=separator>•</span>
-<span class=tag>
-<a href=/tags/open-source/>open-source</a>
-</span>
+<span class=tag><a href=/tags/open-source/>open-source</a></span>
 <span class=separator>•</span>
-<span class=tag>
-<a href=/tags/c++/>c++</a>
-</span></div>
-</div>
-</header>
-<div>
-<p>Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like <code>print</code>/<code>call</code> in GDB or <code>expr</code>/<code>p</code> in LLDB. It is also used extensively by the IDEs to support typical UI workflows: <a href="https://docs.microsoft.com/en-us/visualstudio/ide/reference/immediate-window?view=vs-2019">Immediate Window</a>, <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/watch-and-quickwatch-windows?view=vs-2019">Watch Window</a>, hovering over a variable, custom data visualizers (see <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019">NatVis</a>), etc.</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#666>*</span> <span style=color:#007020;font-weight:700>thread</span> <span>#</span><span style=color:#40a070>1</span>, queue <span style=color:#666>=</span> <span>&#39;</span>com.apple.main<span style=color:#666>-</span><span style=color:#007020;font-weight:700>thread</span><span>&#39;</span>, stop reason <span style=color:#666>=</span> step in
-    frame <span>#</span><span style=color:#40a070>0</span><span style=color:#666>:</span> <span style=color:#40a070>0x0000000100003fb2</span> a.out<span>`</span>main at zero.<span style=color:#002070;font-weight:700>cc</span>:<span style=color:#40a070>3</span><span style=color:#666>:</span><span style=color:#40a070>12</span>
-   <span style=color:#40a070>1</span>    <span style=color:#902000>int</span> main() {
-   <span style=color:#40a070>2</span>        <span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>1</span>;
-<span style=color:#666>-&gt;</span> <span style=color:#40a070>3</span>        <span style=color:#007020;font-weight:700>return</span> i;
-   <span style=color:#40a070>4</span>    }
-
-(lldb) expr i <span style=color:#666>+</span> <span style=color:#40a070>1</span>
-(<span style=color:#902000>int</span>) <span>$</span><span style=color:#40a070>0</span> <span style=color:#666>=</span> <span style=color:#40a070>2</span>
-(lldb) expr (<span style=color:#902000>float</span>)i <span style=color:#666>+</span> <span style=color:#007020;font-weight:700>static_cast</span><span style=color:#666>&lt;</span><span style=color:#902000>int</span><span style=color:#666>&gt;</span>(<span style=color:#40a070>1.4</span>) <span style=color:#666>*</span> <span style=color:#40a070>3</span>
-(<span style=color:#902000>float</span>) <span>$</span><span style=color:#40a070>1</span> <span style=color:#666>=</span> <span style=color:#40a070>4</span>
-</code></pre></div><p>^ example of expression evaluation in LLDB</p>
-<p>The expression evaluator can be implemented as an interpreter of the target language (that&rsquo;s what GDB does for C++, for example) or by re-using the bits of the compiler infrastructure (e.g. LLDB uses Clang, C# debugger in Visual Studio uses Roslyn). Often it&rsquo;s a combination, when the compiler can be used as a library and behaves differenly when invoked by the debugger (this is how C# worked in earlier versions of Visual Studio, <a href=https://twitter.com/AnsonHorton/status/1343901623962103809>twitter thread</a>).</p>
-<blockquote>
-<p>If you&rsquo;re interesting in the unusual debugger architectures, read about <a href=https://plan9.io/sys/doc/acidpaper.html>ACID</a> &ndash; the debugger implemented as a language interpreter with specialized primitives that provide debugger support.</p>
-</blockquote>
-<hr>
-<p><a href=https://lldb.llvm.org/>LLDB</a> is the debugger component of the LLVM project. It is built as a set of reusable components which extensively use existing libraries from LLVM, such as the Clang expression parser and LLVM disassembler.</p>
-<p>LLDB has a very powerfull built-in expression evaluator, powered by <a href=https://clang.llvm.org/>Clang</a>. It can handle almost any valid C++ as well as perform function calls. But the downside of this power is poor performance, especially for large programs with lots of debug information. This is not as critical for interactive use, but doesn&rsquo;t work well for implementing IDE integrations. For example, <a href=https://github.com/googlestadia/vsi-lldb>Stadia debugger for Visual Studio</a> evaluates dozens and hundreds of expressions for every &ldquo;step&rdquo;, so it has to be fast. Nobody likes slow debuggers!</p>
-<p>This is where <a href=https://github.com/google/lldb-eval>lldb-eval</a> comes in. It&rsquo;s a library for evaluating C++ like expressions in the debugger context, built with performance in mind. It&rsquo;s designed around LLDB, has very similar API and in many cases can be used as a drop-in replacement. The primary use-case is IDE integration (namely, <a href=https://github.com/googlestadia/vsi-lldb>Stadia for Visual Studio</a>). The rest of this post is about the library architecture and design decisions behind it.</p>
-<p><code>lldb-eval</code> is open-source and available on GitHub &ndash; <a href=https://github.com/google/lldb-eval>https://github.com/google/lldb-eval</a>.</p>
-<h2 id=overview>
-Overview
-<a class=heading-link href=#overview>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<p><img src=lldb-eval-inception.jpg alt=image></p>
-<p>Basically <code>lldb-eval</code> is an interpreter for a subset of C++, written in C++. Like a typical interpreter it has a parser that produces an expression AST and an evaluator that evaluates that AST. The parser performs type-checking and semantics analysis, while the evaluator implements the runtime control flow analysis.</p>
-<h2 id=expression-language>
-Expression language
-<a class=heading-link href=#expression-language>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<p>The expression language is a subset of C++ (<a href=https://github.com/google/lldb-eval/blob/master/docs/expr-lang.ebnf>EBNF grammar</a>). The grammar supports all basic C++ features: arithmetic operators, members access, C-style and C++-style casts, function calls (for supported debugger intrinsics). Overall the set of features is aimed to be compatible with other debuggers and <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019#BKMK_Expressions_and_formatting">NatVis rules</a>.</p>
-<h2 id=parser>
-Parser
-<a class=heading-link href=#parser>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<p>The first core component in <code>lldb-eval</code> is <code>Parser</code> (<a href=https://github.com/google/lldb-eval/blob/master/lldb-eval/parser.h>parser.h</a>). It&rsquo;s a classic <a href=https://en.wikipedia.org/wiki/Recursive_descent_parser>recursive descent parser</a> with several modifications to accomodate for C++ grammar. Since C++ cannot be expressed in pure <a href=https://en.wikipedia.org/wiki/LL_grammar>LL grammar</a>, the parser performs limited look-ahead and has the ability to do tentative parsing with rollbacks. The input data is limited to one C++ <em>expression</em>, although it can be multi-line and arbitrarily long.</p>
-<p>The parser relies on <code>clang</code> library to do the lexing and preprocessing (using <code>clang::Preprocessor</code>) and then processes the stream of C++ token to build an expression <a href=https://en.wikipedia.org/wiki/Abstract_syntax_tree>AST</a>. The AST is annotated, meaning that the parser resolves the type for every node and performs the type checking and semantic analysis. The parser tries to produce rich diagnostics (with source locations whenever possible), most errors messages are similar to <code>clang</code>:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#666>&gt;</span> test<span style=color:#666>::</span>foo.bar<span style=color:#666>-&gt;</span>baz.x
-<span style=color:#666>&lt;</span>expr<span style=color:#666>&gt;:</span><span style=color:#40a070>1</span><span style=color:#666>:</span><span style=color:#40a070>14</span><span style=color:#666>:</span> member reference type <span>&#39;</span>test<span style=color:#666>::</span>Bar<span>&#39;</span> is not a pointer; did you mean to use <span style=color:#4070a0>&#39;.&#39;</span><span style=color:#666>?</span>
-test<span style=color:#666>::</span>foo.bar<span style=color:#666>-&gt;</span>baz.x
-             <span style=color:#666>^</span>
-
-<span style=color:#666>&gt;</span> test<span style=color:#666>::</span>foo.bar.baz <span style=color:#666>+</span> <span style=color:#40a070>2</span>
-<span style=color:#666>&lt;</span>expr<span style=color:#666>&gt;:</span><span style=color:#40a070>1</span><span style=color:#666>:</span><span style=color:#40a070>19</span><span style=color:#666>:</span> invalid operands to binary expression (<span>&#39;</span>test<span style=color:#666>::</span>Baz<span>&#39;</span> and <span>&#39;</span><span style=color:#902000>int</span><span>&#39;</span>)
-test<span style=color:#666>::</span>foo.bar.baz <span style=color:#666>+</span> <span style=color:#40a070>2</span>
-                  <span style=color:#666>^</span>
-</code></pre></div><h3 id=identifier-resolution>
-Identifier resolution
-<a class=heading-link href=#identifier-resolution>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h3>
-<p>Unlike the regular compiler, <code>lldb-eval</code> resolves the expression in the debugger context and uses the debug information from the target process (DWARF, PDB) to resolve the identifiers (variables, types). If the binary being debugged doesn&rsquo;t have the debug information and symbols, there isn&rsquo;t much <code>lldb-eval</code> can do about it. Same goes for binaries built with higher optimization levels &ndash; some symbols might be optimized away (e.g. unused types and variables are first candidates for removal) and the expression evaluator will not be able to use them. These restrictions are not really specific for <code>lldb-eval</code>. If some variable is optimized away, you will not be able to see its value using commands like <code>frame variable</code> either.</p>
-<p>To resolve an identifier, it&rsquo;s not sufficient to just perform a name lookup (and, unfortunately, that&rsquo;s basically the API we have &ndash; <code>FindTypes(name)</code> and <code>FindVariables(name)</code>). C++ uses namespaces and classes/structs to define scoping rules. E.g. <code>int foo::bar</code> is different from <code>int baz::bar</code> (<code>foo</code> and <code>baz</code> being namespaces). When the parser encounters an identifier <code>bar</code> it needs to resolve it. Is it a <em>variable</em> from <code>foo</code>? Or maybe it&rsquo;s a <em>type</em> defined in <code>other_namespace</code>? In C++ it&rsquo;s possible to declare variables and types almost anywhere, so a proper resolver should take the hierarchical scoping rules into account:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#007020;font-weight:700>using</span> myint <span style=color:#666>=</span> <span style=color:#902000>int</span>;
-
-<span style=color:#902000>void</span> <span style=color:#06287e>func</span>() {
-  <span style=color:#60a0b0;font-style:italic>// `(myint)1.5` is 1
-</span><span style=color:#60a0b0;font-style:italic></span>}
-
-<span style=color:#007020;font-weight:700>namespace</span> ns {
-
-<span style=color:#007020;font-weight:700>using</span> myint <span style=color:#666>=</span> <span style=color:#902000>double</span>;
-
-<span style=color:#902000>void</span> <span style=color:#06287e>func</span>() {
-  <span style=color:#60a0b0;font-style:italic>// `(myint)1.5` is 1.5
-</span><span style=color:#60a0b0;font-style:italic></span>
-  <span style=color:#60a0b0;font-style:italic>// Credit @cor3ntin -- https://twitter.com/cor3ntin/status/1373773782700146689
-</span><span style=color:#60a0b0;font-style:italic></span>  <span style=color:#007020;font-weight:700>for</span> (<span style=color:#007020;font-weight:700>typedef</span> <span style=color:#902000>int</span> myint; myint <span style=color:#002070;font-weight:700>x</span> : {<span style=color:#40a070>1.5</span>}) {
-    <span style=color:#60a0b0;font-style:italic>// `(myint)1.5` is 1 😱
-</span><span style=color:#60a0b0;font-style:italic></span>  }
-}
-
-}
-</code></pre></div><p>But C++ grammar is even more complicated than that and allows for a lot of ambiguities. Depending on the surrounding context the same expression can mean very different things. Consider the expression <code>(myint)-1</code>. Your first (very reasonable) guess was probably that it&rsquo;s a cast of <code>-1</code> to the type <code>myint</code>. However that can also be an arithmetic operation if <code>myint</code> is a variable!</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#902000>int</span> myint <span style=color:#666>=</span> <span style=color:#40a070>1</span>;
-
-<span style=color:#902000>void</span> <span style=color:#06287e>func_1</span>() {
-  <span style=color:#60a0b0;font-style:italic>// `(myint)-1` is 0
-</span><span style=color:#60a0b0;font-style:italic></span>}
-
-<span style=color:#902000>void</span> <span style=color:#06287e>func_2</span>() {
-  <span style=color:#007020;font-weight:700>using</span> myint <span style=color:#666>=</span> <span style=color:#902000>uint16_t</span>;
-  <span style=color:#60a0b0;font-style:italic>// `(myint)-1` is 65535 😱
-</span><span style=color:#60a0b0;font-style:italic></span>}
-</code></pre></div><p>The C++ <em>compiler</em> can easily resolve <code>myint</code>, because it knows exactly what the current scope is. All shadowing operations have already been applied (i.e. <code>using myint</code> shadowed <code>int myint</code>), so the resolution is unambiguous. The parser in <code>lldb-eval</code>, however, doesn&rsquo;t have the scope information, it can only lookup identifiers by their names. The best we can do is to get the current scope (e.g. <code>int foo::bar()</code>) and then look for the &ldquo;closest&rdquo; symbol in the hierarchy of this scope. For example, if the current frame is <code>int ns::Class::foo()</code>, we can look for (<code>ns::Class::foo::bar</code>, <code>ns::Class::bar</code>, <code>ns::bar</code>, <code>::bar</code>) and take the first match.</p>
-<p>There are other limitations we face when using public LLDB API. For example, static const members and enum constants are not currently being indexed by LLDB, even though they&rsquo;re present in the DWARF debug info. There are patches to improve this, but it&rsquo;s still work in progress:</p>
-<ul>
-<li><a href=https://reviews.llvm.org/D92643>Lookup unscoped enumeration members</a></li>
-<li><a href=https://reviews.llvm.org/D94077>Lookup static const members</a></li>
-</ul>
-<h3 id=semantic-analysis>
-Semantic analysis
-<a class=heading-link href=#semantic-analysis>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h3>
-<p>The semantic analysis in <code>lldb-eval</code> is heavily inspired by other C++ compilers (GCC, Clang) and, at its core, is very similar to what they do. The parser resolves the types and performs all kinds of checks to verify that the given expression is valid in the <em>current context</em>. This includes simple checks like detecting addition of incompatible types (e.g. <code>int</code> and <code>Foo</code>), as well as more complicated <a href=https://en.cppreference.com/w/cpp/language/implicit_conversion#Numeric_promotions>integral promotions</a>, implicit type conversions and <code>lvalue/rvalue</code> control flow analysis.</p>
-<p>That said, the parser has a number of deliberate deviations from C++ spec due to the fact that the expression interpreter in the debugger has a slightly different goal than the compiler. The compiler is meant to verify that the code is correct and produce the most optimal output, while still maintaining all the invariants of the language specification. The debugger, however, aims to help the developer in inspecting the program state.</p>
-<p>For example, in C++ it is illegal to compare pointers with numeric literals except for literal zero:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#902000>int</span><span style=color:#666>*</span> p <span style=color:#666>=</span> <span style=color:#40a070>0</span>;
-
-p <span style=color:#666>==</span> <span style=color:#40a070>1</span>;  <span style=color:#60a0b0;font-style:italic>// error: comparison between pointer and integer (&#39;int *&#39; and &#39;int&#39;)
-</span><span style=color:#60a0b0;font-style:italic></span>p <span style=color:#666>==</span> <span style=color:#40a070>0</span>;  <span style=color:#60a0b0;font-style:italic>// OK, literal zero is allowed
-</span></code></pre></div><p>The debuggers usually allow this (the example is LLDB, but GDB and MSVC do the same):</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>Process <span style=color:#40a070>32964</span> stopped
-<span style=color:#666>*</span> <span style=color:#007020;font-weight:700>thread</span> <span>#</span><span style=color:#40a070>1</span>, queue <span style=color:#666>=</span> <span>&#39;</span>com.apple.main<span style=color:#666>-</span><span style=color:#007020;font-weight:700>thread</span><span>&#39;</span>, stop reason <span style=color:#666>=</span> step in
-    frame <span>#</span><span style=color:#40a070>0</span><span style=color:#666>:</span> <span style=color:#40a070>0x0000000100003fb5</span> a.out<span>`</span>main at zero.<span style=color:#002070;font-weight:700>cc</span>:<span style=color:#40a070>3</span><span style=color:#666>:</span><span style=color:#40a070>5</span>
-   <span style=color:#40a070>1</span>    <span style=color:#902000>int</span> main() {
-   <span style=color:#40a070>2</span>        <span style=color:#902000>int</span><span style=color:#666>*</span> p <span style=color:#666>=</span> <span style=color:#40a070>0</span>;
-<span style=color:#666>-&gt;</span> <span style=color:#40a070>3</span>        <span style=color:#007020;font-weight:700>return</span> <span style=color:#40a070>0</span>;
-   <span style=color:#40a070>4</span>    }
-
-(lldb) p p <span style=color:#666>==</span> <span style=color:#40a070>1</span>
-(<span style=color:#902000>bool</span>) <span>$</span><span style=color:#40a070>0</span> <span style=color:#666>=</span> <span style=color:#007020>false</span>
-(lldb) p p <span style=color:#666>==</span> <span style=color:#40a070>0</span>
-(<span style=color:#902000>bool</span>) <span>$</span><span style=color:#40a070>1</span> <span style=color:#666>=</span> <span style=color:#007020>true</span>
-</code></pre></div><p>Clang <a href=https://github.com/llvm/llvm-project/blob/5b2d8503d1d4b925e30fd2b91f97bfd625f03157/clang/lib/Sema/SemaExpr.cpp#L11971-L11972>explicitly allows this</a> if the expression is being parsed in the debugger context. Same goes for <a href=https://github.com/llvm/llvm-project/blob/5b2d8503d1d4b925e30fd2b91f97bfd625f03157/clang/lib/Sema/SemaExprMember.cpp#L1421>accessing private and protected members</a> of classes and structs. <em>Of course</em> if someone types <code>foo->x_</code>, they don&rsquo;t expect to get <code>'x_' is a private member of 'Foo'</code>. That&rsquo;s why <code>lldb-eval</code> is less strict than the compiler and tries to do what the user expects in the given context.</p>
-<p><img src=lldb-eval-vs-compiler.jpg alt=image></p>
-<h2 id=interpreter>
-Interpreter
-<a class=heading-link href=#interpreter>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<p>The second core component in <code>lldb-eval</code> is the <code>Interpreter</code> (<a href=https://github.com/google/lldb-eval/blob/master/lldb-eval/eval.h>eval.h</a>). It takes the AST produced by the parser and recursively evaluates it. Typically interpreters convert the AST to some kind of <a href=https://en.wikipedia.org/wiki/Bytecode>bytecode</a> or <a href=https://en.wikipedia.org/wiki/Intermediate_representation>IR</a> first, but <code>lldb-eval</code> skips this step for simplicity.</p>
-<p>Since the parser is guaranteed to produce a <em>valid</em> AST (or give a reasonable error), the <code>Interpreter</code> makes an assumption of correctness &ndash; all the types match, all casts are correct, all functions have correct number of arguments, etc. This doesn&rsquo;t prevent <em>runtime</em> errors though. For example, one can still dereference a null pointer &ndash; <code>*(int*)0 + 1</code>. The parser will be happy, but the interpreter will have to deal with zero pointer.</p>
-<p>The interpreter implements a number of optimizations related to UB (undefined behavior) described in C++ specification. A little known fact, it&rsquo;s actually perfectly legal to dereference a null pointer <em>as long as the result of the dereference is not used</em>. For example, this is well-formed C++:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#902000>int</span> x <span style=color:#666>=</span> <span style=color:#40a070>42</span>;
-<span style=color:#902000>int</span><span style=color:#666>*</span> p <span style=color:#666>=</span> <span style=color:#666>&amp;</span>( <span style=color:#007020>true</span> <span style=color:#666>?</span> <span style=color:#666>*</span>(<span style=color:#902000>int</span><span style=color:#666>*</span>)<span style=color:#40a070>0</span> <span style=color:#666>:</span> x );
-
-<span style=color:#60a0b0;font-style:italic>// `p + 1` is 1;
-</span></code></pre></div><p>The interpreter performs flow control analysis, detects when the result of the dereference is not used and eliminates the &ldquo;pair&rdquo; operations of <code>&*</code>. Same logic also applies for member access (which is <em>basically</em> a dereference):</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#007020;font-weight:700>auto</span> p <span style=color:#666>=</span> <span style=color:#666>&amp;</span>((Foo<span style=color:#666>*</span>)<span style=color:#40a070>0</span>)<span style=color:#666>-&gt;</span>foo_;
-
-<span style=color:#60a0b0;font-style:italic>// `p` is the offset of `foo_` in `Foo`.
-</span></code></pre></div><p>Implementing this properly, however, is more complicated, because in general it&rsquo;s not possible to calculate the offset &ldquo;statically&rdquo;. If the object in question has virtual base classes, the debug information might not contain all the required information and the offset should be calculated at runtime using the <a href=https://en.wikipedia.org/wiki/Virtual_method_table>vtable</a>. This is doable, but not yet implemented in <code>lldb-eval</code>.</p>
-<h2 id=api>
-API
-<a class=heading-link href=#api>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<p><code>lldb-eval</code> has a minimalistic <a href=lldb-eval/api.h>API</a> which is very similar to LLDB API (not surprising, given that it builds on top on <code>LLDB</code>). The basic method looks like this:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>lldb<span style=color:#666>::</span>SBValue EvaluateExpression(
-  lldb<span style=color:#666>::</span>SBFrame frame, <span style=color:#007020;font-weight:700>const</span> <span style=color:#902000>char</span><span style=color:#666>*</span> expression, lldb<span style=color:#666>::</span>SBError<span style=color:#666>&amp;</span> error);
-</code></pre></div><p>Usually you&rsquo;d want the stack frame where the program is currently stopped, but it&rsquo;s possible to use any valid one (e.g. from another thread or to inspect the variables of the caller function).</p>
-<p>There&rsquo;s a option of using <code>lldb::SBValue</code> instead of <code>lldb::SBFrame</code>, then the expression is evaluated in the context of the given object:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>lldb<span style=color:#666>::</span>SBValue EvaluateExpression(
-  lldb<span style=color:#666>::</span>SBValue scope, <span style=color:#007020;font-weight:700>const</span> <span style=color:#902000>char</span><span style=color:#666>*</span> expression, lldb<span style=color:#666>::</span>SBError<span style=color:#666>&amp;</span> error);
-</code></pre></div><p>For example, <code>this->foo_</code> or just <code>foo_</code> will refer to the member of the context object, not the variable in the current stack frame. This is very useful when evaluating custom visualization logic like <a href=https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects>NatVis</a>.</p>
-<h3 id=maintaning-state>
-Maintaning state
-<a class=heading-link href=#maintaning-state>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h3>
-<p><code>lldb-eval</code> is stateless (and thread-safe), but sometimes it&rsquo;s useful to have some state that the expressions can access and modify. For example, in NatVis <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019#customlistitems-expansion">CustomListItems</a> allows you to declare variables that can be modified by the expression. Typical examples &ndash; a counter or a pointer to a bucket in hash-table.</p>
-<p>Both versions of <code>EvaluateExpression</code> allow passing of a list of external identifiers/values that can be used by the expression. This makes it possible to have a state between the expression evaluations, while keeping the library stateless:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>lldb<span style=color:#666>::</span>SBError ignore;
-lldb<span style=color:#666>::</span>SBValue counter <span style=color:#666>=</span> lldb_eval<span style=color:#666>::</span>EvaluateExpression(frame, <span style=color:#4070a0>&#34;10&#34;</span>, ignore);
-
-lldb_eval<span style=color:#666>::</span>ContextVariable var;
-var.name <span style=color:#666>=</span> <span style=color:#4070a0>&#34;counter&#34;</span>;
-var.value <span style=color:#666>=</span> counter;
-
-lldb_eval<span style=color:#666>::</span>ContextVariableList vars;
-vars.data <span style=color:#666>=</span> <span style=color:#666>&amp;</span>var;
-vars.size <span style=color:#666>=</span> <span style=color:#40a070>1</span>;
-
-<span style=color:#007020;font-weight:700>while</span> (counter.GetValueAsUnsigned() <span style=color:#666>&gt;</span> <span style=color:#40a070>0</span>) {
-  lldb_eval<span style=color:#666>::</span>EvaluateExpression(frame, <span style=color:#4070a0>&#34;--counter&#34;</span>, vars, ignore);
-}
-</code></pre></div><p>The code above creates a <code>counter</code> with initial value of <code>10</code> and then decrements it in a loop.</p>
-<h2 id=performance>
-Performance
-<a class=heading-link href=#performance>
-<i class="fa fa-link" aria-hidden=true></i>
-</a>
-</h2>
-<p>The performance of the expression evaluator depends a lot on several factors. The first and likely the biggest factor in most cases is the binary size and the amount of debug information and its format (PDB, DWARF4/DWARF5). The expression evaluator needs to resolve the types and the identifiers and the more of those the process has, the slower the lookups are. Regular DWARF is not optimized for lookups and LLDB has special auxiliary indexes to support fast lookup operations.</p>
-<p>To solve this issues, a new section was introduced in DWARF5 &ndash; <code>.debug_names</code>. It contains a pre-built lookup hash table that can be loaded by the debugger and used &ldquo;as is&rdquo;, without the additional processing. This potentially can reduce the startup time, since the debugger no longer needs to build the indexes manually. However, the format of this hash table is not necessarily optimal and in my experiments I&rsquo;ve seen binaries with <em>extremely</em> unoptimal <code>.debug_names</code> structure. The section doesn&rsquo;t actually have just one hash table, but might contain multiple entries. If your binary has thousands of these hash tables, the performance is not going to be great. Your mileage may vary, of course, and this should be researched case by case.</p>
-<p>Another big factor contributing to the overall performance is the latency to the target process. If you&rsquo;re debugging a program locally the latency can be considered negligible, but if the program runs on a remote machine this is a completely different story. Latency to the remote machine adds up with every command the debugger sends to the debug server. If you have a roundtrip of 10ms-100ms you can effectively send up to 100-10 commands per second. Executing only 10 expressions per second doesn&rsquo;t sound like a lot, right?</p>
-<p>In both <code>LLDB</code> and <code>lldb-eval</code> not every evaluation involves sending commands to the remote process.
-LLDB will try to interpret the expression locally first and only if that is not possible, it will execute the code remotely. For example, simple expression like <code>1 + 2</code> can be interpreted by the debugger host, but expressions with function calls must be executed at the target.</p>
-<p>In <code>lldb-eval</code> all expressions are interpreted locally and the only communication with the target process we need is reading its memory (e.g. values of the variables). This information is cached in the debugger host, so network requests happen only when necessary. Unfortunately, LLDB&rsquo;s remote debugging protocol is not especially optimized for minimizing the amount of messages, so there is some inefficiency here. Optimizing the protocol could improve the overall performance (and not just for <code>lldb-eval</code>).</p>
-<p>Overall, a rough baseline for <code>lldb-eval</code> is <code>~1ms</code> per expression evaluation. This gives us about 200 of expressions in 200ms, which is approximately the latency humans can observe and tolerate &ndash; everything above starts to feel sluggish. For comparison, expression evaluator in LLDB can take up to <code>50-100ms</code> per expression on the binaries in my testing lab. I understand it&rsquo;s a bold claim and needs some proof, so I&rsquo;m working on getting some &ldquo;publishable&rdquo; results and disclosing the setup of the testing lab.</p>
-<hr>
-<p>Discuss this article on <a href=https://lobste.rs/s/jvskdh/blazing_fast_expression_evaluation_for_c>lobste.rs</a></p>
-<hr>
-</div>
-<footer>
-<div id=disqus_thread></div>
-<script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//werat-github-io.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script>
-<noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript>
-<a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a>
-</footer>
-</article>
-</section>
-</div>
-<footer class=footer>
-<section class=container>
-©
+<span class=tag><a href=/tags/c++/>c++</a></span></div></div></header><div><p>Expression evaluation is an integral part of any modern debugger. It allows the user to inspect the program state using the familiar syntax of the target language, as well as perform modifications to the target process (if the side-effects are allowed). If you have ever used command-line debuggers, you&rsquo;re probably familiar with it via commands like <code>print</code>/<code>call</code> in GDB or <code>expr</code>/<code>p</code> in LLDB. It is also used extensively by the IDEs to support typical UI workflows: <a href="https://docs.microsoft.com/en-us/visualstudio/ide/reference/immediate-window?view=vs-2019">Immediate Window</a>, <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/watch-and-quickwatch-windows?view=vs-2019">Watch Window</a>, hovering over a variable, custom data visualizers (see <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019">NatVis</a>), etc.</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span><span style=color:#666>*</span> <span style=color:#007020;font-weight:700>thread</span> <span>#</span><span style=color:#40a070>1</span>, queue <span style=color:#666>=</span> <span>&#39;</span>com.apple.main<span style=color:#666>-</span><span style=color:#007020;font-weight:700>thread</span><span>&#39;</span>, stop reason <span style=color:#666>=</span> step in
+</span></span><span style=display:flex><span>    frame <span>#</span><span style=color:#40a070>0</span><span style=color:#666>:</span> <span style=color:#40a070>0x0000000100003fb2</span> a.out<span>`</span>main at zero.<span style=color:#002070;font-weight:700>cc</span>:<span style=color:#40a070>3</span><span style=color:#666>:</span><span style=color:#40a070>12</span>
+</span></span><span style=display:flex><span>   <span style=color:#40a070>1</span>    <span style=color:#902000>int</span> main() {
+</span></span><span style=display:flex><span>   <span style=color:#40a070>2</span>        <span style=color:#902000>int</span> i <span style=color:#666>=</span> <span style=color:#40a070>1</span>;
+</span></span><span style=display:flex><span><span style=color:#666>-&gt;</span> <span style=color:#40a070>3</span>        <span style=color:#007020;font-weight:700>return</span> i;
+</span></span><span style=display:flex><span>   <span style=color:#40a070>4</span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>(lldb) expr i <span style=color:#666>+</span> <span style=color:#40a070>1</span>
+</span></span><span style=display:flex><span>(<span style=color:#902000>int</span>) <span>$</span><span style=color:#40a070>0</span> <span style=color:#666>=</span> <span style=color:#40a070>2</span>
+</span></span><span style=display:flex><span>(lldb) expr (<span style=color:#902000>float</span>)i <span style=color:#666>+</span> <span style=color:#007020;font-weight:700>static_cast</span><span style=color:#666>&lt;</span><span style=color:#902000>int</span><span style=color:#666>&gt;</span>(<span style=color:#40a070>1.4</span>) <span style=color:#666>*</span> <span style=color:#40a070>3</span>
+</span></span><span style=display:flex><span>(<span style=color:#902000>float</span>) <span>$</span><span style=color:#40a070>1</span> <span style=color:#666>=</span> <span style=color:#40a070>4</span>
+</span></span></code></pre></div><p>^ example of expression evaluation in LLDB</p><p>The expression evaluator can be implemented as an interpreter of the target language (that&rsquo;s what GDB does for C++, for example) or by re-using the bits of the compiler infrastructure (e.g. LLDB uses Clang, C# debugger in Visual Studio uses Roslyn). Often it&rsquo;s a combination, when the compiler can be used as a library and behaves differenly when invoked by the debugger (this is how C# worked in earlier versions of Visual Studio, <a href=https://twitter.com/AnsonHorton/status/1343901623962103809>twitter thread</a>).</p><blockquote><p>If you&rsquo;re interesting in the unusual debugger architectures, read about <a href=https://plan9.io/sys/doc/acidpaper.html>ACID</a> &ndash; the debugger implemented as a language interpreter with specialized primitives that provide debugger support.</p></blockquote><hr><p><a href=https://lldb.llvm.org/>LLDB</a> is the debugger component of the LLVM project. It is built as a set of reusable components which extensively use existing libraries from LLVM, such as the Clang expression parser and LLVM disassembler.</p><p>LLDB has a very powerfull built-in expression evaluator, powered by <a href=https://clang.llvm.org/>Clang</a>. It can handle almost any valid C++ as well as perform function calls. But the downside of this power is poor performance, especially for large programs with lots of debug information. This is not as critical for interactive use, but doesn&rsquo;t work well for implementing IDE integrations. For example, <a href=https://github.com/googlestadia/vsi-lldb>Stadia debugger for Visual Studio</a> evaluates dozens and hundreds of expressions for every &ldquo;step&rdquo;, so it has to be fast. Nobody likes slow debuggers!</p><p>This is where <a href=https://github.com/google/lldb-eval>lldb-eval</a> comes in. It&rsquo;s a library for evaluating C++ like expressions in the debugger context, built with performance in mind. It&rsquo;s designed around LLDB, has very similar API and in many cases can be used as a drop-in replacement. The primary use-case is IDE integration (namely, <a href=https://github.com/googlestadia/vsi-lldb>Stadia for Visual Studio</a>). The rest of this post is about the library architecture and design decisions behind it.</p><p><code>lldb-eval</code> is open-source and available on GitHub &ndash; <a href=https://github.com/google/lldb-eval>https://github.com/google/lldb-eval</a>.</p><h2 id=overview>Overview
+<a class=heading-link href=#overview><i class="fa fa-link" aria-hidden=true></i></a></h2><p><img src=lldb-eval-inception.jpg alt=image></p><p>Basically <code>lldb-eval</code> is an interpreter for a subset of C++, written in C++. Like a typical interpreter it has a parser that produces an expression AST and an evaluator that evaluates that AST. The parser performs type-checking and semantics analysis, while the evaluator implements the runtime control flow analysis.</p><h2 id=expression-language>Expression language
+<a class=heading-link href=#expression-language><i class="fa fa-link" aria-hidden=true></i></a></h2><p>The expression language is a subset of C++ (<a href=https://github.com/google/lldb-eval/blob/master/docs/expr-lang.ebnf>EBNF grammar</a>). The grammar supports all basic C++ features: arithmetic operators, members access, C-style and C++-style casts, function calls (for supported debugger intrinsics). Overall the set of features is aimed to be compatible with other debuggers and <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019#BKMK_Expressions_and_formatting">NatVis rules</a>.</p><h2 id=parser>Parser
+<a class=heading-link href=#parser><i class="fa fa-link" aria-hidden=true></i></a></h2><p>The first core component in <code>lldb-eval</code> is <code>Parser</code> (<a href=https://github.com/google/lldb-eval/blob/master/lldb-eval/parser.h>parser.h</a>). It&rsquo;s a classic <a href=https://en.wikipedia.org/wiki/Recursive_descent_parser>recursive descent parser</a> with several modifications to accomodate for C++ grammar. Since C++ cannot be expressed in pure <a href=https://en.wikipedia.org/wiki/LL_grammar>LL grammar</a>, the parser performs limited look-ahead and has the ability to do tentative parsing with rollbacks. The input data is limited to one C++ <em>expression</em>, although it can be multi-line and arbitrarily long.</p><p>The parser relies on <code>clang</code> library to do the lexing and preprocessing (using <code>clang::Preprocessor</code>) and then processes the stream of C++ token to build an expression <a href=https://en.wikipedia.org/wiki/Abstract_syntax_tree>AST</a>. The AST is annotated, meaning that the parser resolves the type for every node and performs the type checking and semantic analysis. The parser tries to produce rich diagnostics (with source locations whenever possible), most errors messages are similar to <code>clang</code>:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span><span style=color:#666>&gt;</span> test<span style=color:#666>::</span>foo.bar<span style=color:#666>-&gt;</span>baz.x
+</span></span><span style=display:flex><span><span style=color:#666>&lt;</span>expr<span style=color:#666>&gt;:</span><span style=color:#40a070>1</span><span style=color:#666>:</span><span style=color:#40a070>14</span><span style=color:#666>:</span> member reference type <span>&#39;</span>test<span style=color:#666>::</span>Bar<span>&#39;</span> is not a pointer; did you mean to use <span style=color:#4070a0>&#39;.&#39;</span><span style=color:#666>?</span>
+</span></span><span style=display:flex><span>test<span style=color:#666>::</span>foo.bar<span style=color:#666>-&gt;</span>baz.x
+</span></span><span style=display:flex><span>             <span style=color:#666>^</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#666>&gt;</span> test<span style=color:#666>::</span>foo.bar.baz <span style=color:#666>+</span> <span style=color:#40a070>2</span>
+</span></span><span style=display:flex><span><span style=color:#666>&lt;</span>expr<span style=color:#666>&gt;:</span><span style=color:#40a070>1</span><span style=color:#666>:</span><span style=color:#40a070>19</span><span style=color:#666>:</span> invalid operands to binary expression (<span>&#39;</span>test<span style=color:#666>::</span>Baz<span>&#39;</span> and <span>&#39;</span><span style=color:#902000>int</span><span>&#39;</span>)
+</span></span><span style=display:flex><span>test<span style=color:#666>::</span>foo.bar.baz <span style=color:#666>+</span> <span style=color:#40a070>2</span>
+</span></span><span style=display:flex><span>                  <span style=color:#666>^</span>
+</span></span></code></pre></div><h3 id=identifier-resolution>Identifier resolution
+<a class=heading-link href=#identifier-resolution><i class="fa fa-link" aria-hidden=true></i></a></h3><p>Unlike the regular compiler, <code>lldb-eval</code> resolves the expression in the debugger context and uses the debug information from the target process (DWARF, PDB) to resolve the identifiers (variables, types). If the binary being debugged doesn&rsquo;t have the debug information and symbols, there isn&rsquo;t much <code>lldb-eval</code> can do about it. Same goes for binaries built with higher optimization levels &ndash; some symbols might be optimized away (e.g. unused types and variables are first candidates for removal) and the expression evaluator will not be able to use them. These restrictions are not really specific for <code>lldb-eval</code>. If some variable is optimized away, you will not be able to see its value using commands like <code>frame variable</code> either.</p><p>To resolve an identifier, it&rsquo;s not sufficient to just perform a name lookup (and, unfortunately, that&rsquo;s basically the API we have &ndash; <code>FindTypes(name)</code> and <code>FindVariables(name)</code>). C++ uses namespaces and classes/structs to define scoping rules. E.g. <code>int foo::bar</code> is different from <code>int baz::bar</code> (<code>foo</code> and <code>baz</code> being namespaces). When the parser encounters an identifier <code>bar</code> it needs to resolve it. Is it a <em>variable</em> from <code>foo</code>? Or maybe it&rsquo;s a <em>type</em> defined in <code>other_namespace</code>? In C++ it&rsquo;s possible to declare variables and types almost anywhere, so a proper resolver should take the hierarchical scoping rules into account:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span><span style=color:#007020;font-weight:700>using</span> myint <span style=color:#666>=</span> <span style=color:#902000>int</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#902000>void</span> <span style=color:#06287e>func</span>() {
+</span></span><span style=display:flex><span>  <span style=color:#60a0b0;font-style:italic>// `(myint)1.5` is 1
+</span></span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic></span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#007020;font-weight:700>namespace</span> ns {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#007020;font-weight:700>using</span> myint <span style=color:#666>=</span> <span style=color:#902000>double</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#902000>void</span> <span style=color:#06287e>func</span>() {
+</span></span><span style=display:flex><span>  <span style=color:#60a0b0;font-style:italic>// `(myint)1.5` is 1.5
+</span></span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic></span>
+</span></span><span style=display:flex><span>  <span style=color:#60a0b0;font-style:italic>// Credit @cor3ntin -- https://twitter.com/cor3ntin/status/1373773782700146689
+</span></span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic></span>  <span style=color:#007020;font-weight:700>for</span> (<span style=color:#007020;font-weight:700>typedef</span> <span style=color:#902000>int</span> myint; myint <span style=color:#002070;font-weight:700>x</span> : {<span style=color:#40a070>1.5</span>}) {
+</span></span><span style=display:flex><span>    <span style=color:#60a0b0;font-style:italic>// `(myint)1.5` is 1 😱
+</span></span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic></span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>But C++ grammar is even more complicated than that and allows for a lot of ambiguities. Depending on the surrounding context the same expression can mean very different things. Consider the expression <code>(myint)-1</code>. Your first (very reasonable) guess was probably that it&rsquo;s a cast of <code>-1</code> to the type <code>myint</code>. However that can also be an arithmetic operation if <code>myint</code> is a variable!</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span><span style=color:#902000>int</span> myint <span style=color:#666>=</span> <span style=color:#40a070>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#902000>void</span> <span style=color:#06287e>func_1</span>() {
+</span></span><span style=display:flex><span>  <span style=color:#60a0b0;font-style:italic>// `(myint)-1` is 0
+</span></span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic></span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#902000>void</span> <span style=color:#06287e>func_2</span>() {
+</span></span><span style=display:flex><span>  <span style=color:#007020;font-weight:700>using</span> myint <span style=color:#666>=</span> <span style=color:#902000>uint16_t</span>;
+</span></span><span style=display:flex><span>  <span style=color:#60a0b0;font-style:italic>// `(myint)-1` is 65535 😱
+</span></span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic></span>}
+</span></span></code></pre></div><p>The C++ <em>compiler</em> can easily resolve <code>myint</code>, because it knows exactly what the current scope is. All shadowing operations have already been applied (i.e. <code>using myint</code> shadowed <code>int myint</code>), so the resolution is unambiguous. The parser in <code>lldb-eval</code>, however, doesn&rsquo;t have the scope information, it can only lookup identifiers by their names. The best we can do is to get the current scope (e.g. <code>int foo::bar()</code>) and then look for the &ldquo;closest&rdquo; symbol in the hierarchy of this scope. For example, if the current frame is <code>int ns::Class::foo()</code>, we can look for (<code>ns::Class::foo::bar</code>, <code>ns::Class::bar</code>, <code>ns::bar</code>, <code>::bar</code>) and take the first match.</p><p>There are other limitations we face when using public LLDB API. For example, static const members and enum constants are not currently being indexed by LLDB, even though they&rsquo;re present in the DWARF debug info. There are patches to improve this, but it&rsquo;s still work in progress:</p><ul><li><a href=https://reviews.llvm.org/D92643>Lookup unscoped enumeration members</a></li><li><a href=https://reviews.llvm.org/D94077>Lookup static const members</a></li></ul><h3 id=semantic-analysis>Semantic analysis
+<a class=heading-link href=#semantic-analysis><i class="fa fa-link" aria-hidden=true></i></a></h3><p>The semantic analysis in <code>lldb-eval</code> is heavily inspired by other C++ compilers (GCC, Clang) and, at its core, is very similar to what they do. The parser resolves the types and performs all kinds of checks to verify that the given expression is valid in the <em>current context</em>. This includes simple checks like detecting addition of incompatible types (e.g. <code>int</code> and <code>Foo</code>), as well as more complicated <a href=https://en.cppreference.com/w/cpp/language/implicit_conversion#Numeric_promotions>integral promotions</a>, implicit type conversions and <code>lvalue/rvalue</code> control flow analysis.</p><p>That said, the parser has a number of deliberate deviations from C++ spec due to the fact that the expression interpreter in the debugger has a slightly different goal than the compiler. The compiler is meant to verify that the code is correct and produce the most optimal output, while still maintaining all the invariants of the language specification. The debugger, however, aims to help the developer in inspecting the program state.</p><p>For example, in C++ it is illegal to compare pointers with numeric literals except for literal zero:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span><span style=color:#902000>int</span><span style=color:#666>*</span> p <span style=color:#666>=</span> <span style=color:#40a070>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>p <span style=color:#666>==</span> <span style=color:#40a070>1</span>;  <span style=color:#60a0b0;font-style:italic>// error: comparison between pointer and integer (&#39;int *&#39; and &#39;int&#39;)
+</span></span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic></span>p <span style=color:#666>==</span> <span style=color:#40a070>0</span>;  <span style=color:#60a0b0;font-style:italic>// OK, literal zero is allowed
+</span></span></span></code></pre></div><p>The debuggers usually allow this (the example is LLDB, but GDB and MSVC do the same):</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span>Process <span style=color:#40a070>32964</span> stopped
+</span></span><span style=display:flex><span><span style=color:#666>*</span> <span style=color:#007020;font-weight:700>thread</span> <span>#</span><span style=color:#40a070>1</span>, queue <span style=color:#666>=</span> <span>&#39;</span>com.apple.main<span style=color:#666>-</span><span style=color:#007020;font-weight:700>thread</span><span>&#39;</span>, stop reason <span style=color:#666>=</span> step in
+</span></span><span style=display:flex><span>    frame <span>#</span><span style=color:#40a070>0</span><span style=color:#666>:</span> <span style=color:#40a070>0x0000000100003fb5</span> a.out<span>`</span>main at zero.<span style=color:#002070;font-weight:700>cc</span>:<span style=color:#40a070>3</span><span style=color:#666>:</span><span style=color:#40a070>5</span>
+</span></span><span style=display:flex><span>   <span style=color:#40a070>1</span>    <span style=color:#902000>int</span> main() {
+</span></span><span style=display:flex><span>   <span style=color:#40a070>2</span>        <span style=color:#902000>int</span><span style=color:#666>*</span> p <span style=color:#666>=</span> <span style=color:#40a070>0</span>;
+</span></span><span style=display:flex><span><span style=color:#666>-&gt;</span> <span style=color:#40a070>3</span>        <span style=color:#007020;font-weight:700>return</span> <span style=color:#40a070>0</span>;
+</span></span><span style=display:flex><span>   <span style=color:#40a070>4</span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>(lldb) p p <span style=color:#666>==</span> <span style=color:#40a070>1</span>
+</span></span><span style=display:flex><span>(<span style=color:#902000>bool</span>) <span>$</span><span style=color:#40a070>0</span> <span style=color:#666>=</span> <span style=color:#007020>false</span>
+</span></span><span style=display:flex><span>(lldb) p p <span style=color:#666>==</span> <span style=color:#40a070>0</span>
+</span></span><span style=display:flex><span>(<span style=color:#902000>bool</span>) <span>$</span><span style=color:#40a070>1</span> <span style=color:#666>=</span> <span style=color:#007020>true</span>
+</span></span></code></pre></div><p>Clang <a href=https://github.com/llvm/llvm-project/blob/5b2d8503d1d4b925e30fd2b91f97bfd625f03157/clang/lib/Sema/SemaExpr.cpp#L11971-L11972>explicitly allows this</a> if the expression is being parsed in the debugger context. Same goes for <a href=https://github.com/llvm/llvm-project/blob/5b2d8503d1d4b925e30fd2b91f97bfd625f03157/clang/lib/Sema/SemaExprMember.cpp#L1421>accessing private and protected members</a> of classes and structs. <em>Of course</em> if someone types <code>foo->x_</code>, they don&rsquo;t expect to get <code>'x_' is a private member of 'Foo'</code>. That&rsquo;s why <code>lldb-eval</code> is less strict than the compiler and tries to do what the user expects in the given context.</p><p><img src=lldb-eval-vs-compiler.jpg alt=image></p><h2 id=interpreter>Interpreter
+<a class=heading-link href=#interpreter><i class="fa fa-link" aria-hidden=true></i></a></h2><p>The second core component in <code>lldb-eval</code> is the <code>Interpreter</code> (<a href=https://github.com/google/lldb-eval/blob/master/lldb-eval/eval.h>eval.h</a>). It takes the AST produced by the parser and recursively evaluates it. Typically interpreters convert the AST to some kind of <a href=https://en.wikipedia.org/wiki/Bytecode>bytecode</a> or <a href=https://en.wikipedia.org/wiki/Intermediate_representation>IR</a> first, but <code>lldb-eval</code> skips this step for simplicity.</p><p>Since the parser is guaranteed to produce a <em>valid</em> AST (or give a reasonable error), the <code>Interpreter</code> makes an assumption of correctness &ndash; all the types match, all casts are correct, all functions have correct number of arguments, etc. This doesn&rsquo;t prevent <em>runtime</em> errors though. For example, one can still dereference a null pointer &ndash; <code>*(int*)0 + 1</code>. The parser will be happy, but the interpreter will have to deal with zero pointer.</p><p>The interpreter implements a number of optimizations related to UB (undefined behavior) described in C++ specification. A little known fact, it&rsquo;s actually perfectly legal to dereference a null pointer <em>as long as the result of the dereference is not used</em>. For example, this is well-formed C++:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span><span style=color:#902000>int</span> x <span style=color:#666>=</span> <span style=color:#40a070>42</span>;
+</span></span><span style=display:flex><span><span style=color:#902000>int</span><span style=color:#666>*</span> p <span style=color:#666>=</span> <span style=color:#666>&amp;</span>( <span style=color:#007020>true</span> <span style=color:#666>?</span> <span style=color:#666>*</span>(<span style=color:#902000>int</span><span style=color:#666>*</span>)<span style=color:#40a070>0</span> <span style=color:#666>:</span> x );
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic>// `p + 1` is 1;
+</span></span></span></code></pre></div><p>The interpreter performs flow control analysis, detects when the result of the dereference is not used and eliminates the &ldquo;pair&rdquo; operations of <code>&*</code>. Same logic also applies for member access (which is <em>basically</em> a dereference):</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span><span style=color:#007020;font-weight:700>auto</span> p <span style=color:#666>=</span> <span style=color:#666>&amp;</span>((Foo<span style=color:#666>*</span>)<span style=color:#40a070>0</span>)<span style=color:#666>-&gt;</span>foo_;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#60a0b0;font-style:italic>// `p` is the offset of `foo_` in `Foo`.
+</span></span></span></code></pre></div><p>Implementing this properly, however, is more complicated, because in general it&rsquo;s not possible to calculate the offset &ldquo;statically&rdquo;. If the object in question has virtual base classes, the debug information might not contain all the required information and the offset should be calculated at runtime using the <a href=https://en.wikipedia.org/wiki/Virtual_method_table>vtable</a>. This is doable, but not yet implemented in <code>lldb-eval</code>.</p><h2 id=api>API
+<a class=heading-link href=#api><i class="fa fa-link" aria-hidden=true></i></a></h2><p><code>lldb-eval</code> has a minimalistic <a href=lldb-eval/api.h>API</a> which is very similar to LLDB API (not surprising, given that it builds on top on <code>LLDB</code>). The basic method looks like this:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span>lldb<span style=color:#666>::</span>SBValue EvaluateExpression(
+</span></span><span style=display:flex><span>  lldb<span style=color:#666>::</span>SBFrame frame, <span style=color:#007020;font-weight:700>const</span> <span style=color:#902000>char</span><span style=color:#666>*</span> expression, lldb<span style=color:#666>::</span>SBError<span style=color:#666>&amp;</span> error);
+</span></span></code></pre></div><p>Usually you&rsquo;d want the stack frame where the program is currently stopped, but it&rsquo;s possible to use any valid one (e.g. from another thread or to inspect the variables of the caller function).</p><p>There&rsquo;s a option of using <code>lldb::SBValue</code> instead of <code>lldb::SBFrame</code>, then the expression is evaluated in the context of the given object:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span>lldb<span style=color:#666>::</span>SBValue EvaluateExpression(
+</span></span><span style=display:flex><span>  lldb<span style=color:#666>::</span>SBValue scope, <span style=color:#007020;font-weight:700>const</span> <span style=color:#902000>char</span><span style=color:#666>*</span> expression, lldb<span style=color:#666>::</span>SBError<span style=color:#666>&amp;</span> error);
+</span></span></code></pre></div><p>For example, <code>this->foo_</code> or just <code>foo_</code> will refer to the member of the context object, not the variable in the current stack frame. This is very useful when evaluating custom visualization logic like <a href=https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects>NatVis</a>.</p><h3 id=maintaning-state>Maintaning state
+<a class=heading-link href=#maintaning-state><i class="fa fa-link" aria-hidden=true></i></a></h3><p><code>lldb-eval</code> is stateless (and thread-safe), but sometimes it&rsquo;s useful to have some state that the expressions can access and modify. For example, in NatVis <a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019#customlistitems-expansion">CustomListItems</a> allows you to declare variables that can be modified by the expression. Typical examples &ndash; a counter or a pointer to a bucket in hash-table.</p><p>Both versions of <code>EvaluateExpression</code> allow passing of a list of external identifiers/values that can be used by the expression. This makes it possible to have a state between the expression evaluations, while keeping the library stateless:</p><div class=highlight><pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=display:flex><span>lldb<span style=color:#666>::</span>SBError ignore;
+</span></span><span style=display:flex><span>lldb<span style=color:#666>::</span>SBValue counter <span style=color:#666>=</span> lldb_eval<span style=color:#666>::</span>EvaluateExpression(frame, <span style=color:#4070a0>&#34;10&#34;</span>, ignore);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>lldb_eval<span style=color:#666>::</span>ContextVariable var;
+</span></span><span style=display:flex><span>var.name <span style=color:#666>=</span> <span style=color:#4070a0>&#34;counter&#34;</span>;
+</span></span><span style=display:flex><span>var.value <span style=color:#666>=</span> counter;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>lldb_eval<span style=color:#666>::</span>ContextVariableList vars;
+</span></span><span style=display:flex><span>vars.data <span style=color:#666>=</span> <span style=color:#666>&amp;</span>var;
+</span></span><span style=display:flex><span>vars.size <span style=color:#666>=</span> <span style=color:#40a070>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#007020;font-weight:700>while</span> (counter.GetValueAsUnsigned() <span style=color:#666>&gt;</span> <span style=color:#40a070>0</span>) {
+</span></span><span style=display:flex><span>  lldb_eval<span style=color:#666>::</span>EvaluateExpression(frame, <span style=color:#4070a0>&#34;--counter&#34;</span>, vars, ignore);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>The code above creates a <code>counter</code> with initial value of <code>10</code> and then decrements it in a loop.</p><h2 id=performance>Performance
+<a class=heading-link href=#performance><i class="fa fa-link" aria-hidden=true></i></a></h2><p>The performance of the expression evaluator depends a lot on several factors. The first and likely the biggest factor in most cases is the binary size and the amount of debug information and its format (PDB, DWARF4/DWARF5). The expression evaluator needs to resolve the types and the identifiers and the more of those the process has, the slower the lookups are. Regular DWARF is not optimized for lookups and LLDB has special auxiliary indexes to support fast lookup operations.</p><p>To solve this issues, a new section was introduced in DWARF5 &ndash; <code>.debug_names</code>. It contains a pre-built lookup hash table that can be loaded by the debugger and used &ldquo;as is&rdquo;, without the additional processing. This potentially can reduce the startup time, since the debugger no longer needs to build the indexes manually. However, the format of this hash table is not necessarily optimal and in my experiments I&rsquo;ve seen binaries with <em>extremely</em> unoptimal <code>.debug_names</code> structure. The section doesn&rsquo;t actually have just one hash table, but might contain multiple entries. If your binary has thousands of these hash tables, the performance is not going to be great. Your mileage may vary, of course, and this should be researched case by case.</p><p>Another big factor contributing to the overall performance is the latency to the target process. If you&rsquo;re debugging a program locally the latency can be considered negligible, but if the program runs on a remote machine this is a completely different story. Latency to the remote machine adds up with every command the debugger sends to the debug server. If you have a roundtrip of 10ms-100ms you can effectively send up to 100-10 commands per second. Executing only 10 expressions per second doesn&rsquo;t sound like a lot, right?</p><p>In both <code>LLDB</code> and <code>lldb-eval</code> not every evaluation involves sending commands to the remote process.
+LLDB will try to interpret the expression locally first and only if that is not possible, it will execute the code remotely. For example, simple expression like <code>1 + 2</code> can be interpreted by the debugger host, but expressions with function calls must be executed at the target.</p><p>In <code>lldb-eval</code> all expressions are interpreted locally and the only communication with the target process we need is reading its memory (e.g. values of the variables). This information is cached in the debugger host, so network requests happen only when necessary. Unfortunately, LLDB&rsquo;s remote debugging protocol is not especially optimized for minimizing the amount of messages, so there is some inefficiency here. Optimizing the protocol could improve the overall performance (and not just for <code>lldb-eval</code>).</p><p>Overall, a rough baseline for <code>lldb-eval</code> is <code>~1ms</code> per expression evaluation. This gives us about 200 of expressions in 200ms, which is approximately the latency humans can observe and tolerate &ndash; everything above starts to feel sluggish. For comparison, expression evaluator in LLDB can take up to <code>50-100ms</code> per expression on the binaries in my testing lab. I understand it&rsquo;s a bold claim and needs some proof, so I&rsquo;m working on getting some &ldquo;publishable&rdquo; results and disclosing the setup of the testing lab.</p><hr><p>Discuss this article on <a href=https://lobste.rs/s/jvskdh/blazing_fast_expression_evaluation_for_c>lobste.rs</a></p><hr></div><footer><div id=disqus_thread></div><script type=application/javascript>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var t=document,e=t.createElement('script');e.async=!0,e.src='//werat-github-io.disqus.com/embed.js',e.setAttribute('data-timestamp',+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></footer></article></section></div><footer class=footer><section class=container>©
 2017 -
 2022
 Andy Hippo
 ·
-Powered by <a href=https://gohugo.io/>Hugo</a> & <a href=https://github.com/luizdepra/hugo-coder/>Coder</a>.
-</section>
-</footer>
-</main>
-<script src=/js/coder.min.03b17769f4f91ae35667e1f2a1ca8c16f50562576cf90ff32b3179926914daa5.js integrity="sha256-A7F3afT5GuNWZ+HyocqMFvUFYlds+Q/zKzF5kmkU2qU="></script>
+Powered by <a href=https://gohugo.io/>Hugo</a> & <a href=https://github.com/luizdepra/hugo-coder/>Coder</a>.</section></footer></main><script src=/js/coder.min.1e7ed4c0db4e8708b345265f5fcd5fbbd6753672f2f79f33c5dacbd22f524208.js integrity="sha256-Hn7UwNtOhwizRSZfX81fu9Z1NnLy958zxdrL0i9SQgg="></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-91441325-1"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-91441325-1')</script>
-</body>
-</html>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','UA-91441325-1')</script></body></html>
