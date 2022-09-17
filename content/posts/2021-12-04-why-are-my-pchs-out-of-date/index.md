@@ -101,7 +101,7 @@ Typically this wouldn't cause an issue -- if local time is always the same, the 
 
 I don't know whether it's a bug or a feature, but my guess it's unlikely to be fixed anytime soon because backwards compatibility™. And that means that twice a year our users might need to rebuild their code just because. That's why we can't have nice things ¯\\\_(ツ)\_/¯
 
-Unfortunately I haven't found a good way to alter this behaviour. [Other people ran into this problem as well](https://www.advancedinstaller.com/forums/viewtopic.php?t=45880), but no solutions have been posted. It's certanly possible to add a custom step to the installer to walk over the files and "correct" their `mtime`, but who knows what else might break because of this. If you know a better way, please, send help!
+Unfortunately I haven't found a good way to alter this behaviour. [Other people ran into this problem as well](https://www.advancedinstaller.com/forums/viewtopic.php?t=45880), but no solutions have been posted. It's certainly possible to add a custom step to the installer to walk over the files and "correct" their `mtime`, but who knows what else might break because of this. If you know a better way, please, send help!
 
 ---
 
