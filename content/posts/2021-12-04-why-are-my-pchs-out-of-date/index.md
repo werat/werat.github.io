@@ -6,6 +6,7 @@ tags:
    - clang
    - msi
    - windows installer
+   - windows
 ---
 
 Last week I got an interesting bug report from a colleague. They were minding their own business and playing with Unreal Engine 5 when suddenly a wild build error appeared and said that some precompiled headers are out of date:

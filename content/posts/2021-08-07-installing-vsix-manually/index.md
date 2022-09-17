@@ -6,6 +6,7 @@ tags:
    - vsix
    - msi
    - windows installer
+   - windows
 ---
 
 Visual Studio extensions are typically distributed via [VSIX packages](https://docs.microsoft.com/en-us/visualstudio/extensibility/anatomy-of-a-vsix-package?view=vs-2019). Visual Studio comes with an installer `vsixinstaller.exe`, which handles the actuall installation process. When you download the VSIX file from the extension gallery and then double-click it or when you install the extension from Visual Studio via the "Extensions and Updates" menu the above mentioned installer is invoked and does all the work. It's also possible to use `vsixinstaller.exe` directly if you need to install the extensions programmatically (e.g. in a script that sets up a new developer machine).
