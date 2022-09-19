@@ -20,8 +20,11 @@ disqusShortname = "werat-github-io"
   hideColorSchemeToggle = true
   customCSS = ["css/custom.css"]
 
-[params.googleTagManager]
-  id = "UA-91441325-1"
+# [params.googleTagManager]
+#  id = "UA-91441325-1"
+
+[params.goatCounter]
+  code = "werat-dev"
 
 [markup.goldmark.renderer]
   unsafe = true
