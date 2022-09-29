@@ -39,9 +39,11 @@ pre > code {
     border: 1px solid #bbbbbb;
 }
 
+.list ul li {
+    margin-bottom: 1rem;
+}
 .list ul li .date {
     font-size: 1.6rem;
-    margin-bottom: 1rem;
     color: #828282;
 }
 .list ul li .title {
