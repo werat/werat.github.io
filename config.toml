@@ -10,11 +10,11 @@ disqusShortname = "werat-github-io"
 [params]
   favicon_32 = "img/logo-avatar-32.png"
   favicon_16 = "img/logo-avatar-16.png"
-  touchicon = "img/logo-avatar.jpg"
+  touchicon = "img/logo-avatar.png"
 
   author = "Andy Hippo"
   keywords = "blog,developer,personal"
-  avatarURL = "img/logo-avatar.jpg"
+  avatarURL = "img/logo-avatar.png"
   since = 2017
   colorScheme = "light"
   hideColorSchemeToggle = true
