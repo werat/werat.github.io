@@ -34,19 +34,19 @@ disqusShortname = "werat-github-io"
 
 [[params.social]]
   name = "Github"
-  icon = "fa fa-github"
+  icon = "fa fa-2x fa-github"
   weight = 1
   url = "https://github.com/werat/"
 
 [[params.social]]
   name = "Twitter"
-  icon = "fa fa-twitter"
+  icon = "fa fa-2x fa-twitter"
   weight = 2
   url = "https://twitter.com/werat/"
 
 [[params.social]]
   name = "LinkedIn"
-  icon = "fa fa-linkedin"
+  icon = "fa fa-2x fa-linkedin"
   weight = 3
   url = "https://www.linkedin.com/in/werat/"
 
@@ -62,7 +62,7 @@ disqusShortname = "werat-github-io"
 
 [[params.social]]
   name = "RSS"
-  icon = "fa fa-rss"
+  icon = "fa fa-2x fa-rss"
   weight = 3
   url = "https://werat.dev/index.xml"
   rel = "alternate"
