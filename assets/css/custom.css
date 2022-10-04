@@ -39,6 +39,9 @@ pre > code {
     border: 1px solid #bbbbbb;
 }
 
+.container .list {
+    max-width: 95rem;
+}
 .list ul li {
     margin-bottom: 1rem;
 }
