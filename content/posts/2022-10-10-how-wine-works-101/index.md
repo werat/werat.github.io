@@ -330,3 +330,9 @@ Wine has been in development for many years and came a long way. Today you can r
 ---
 
 I hope this article gave you a basic idea of how Wine works. As I warned in the disclaimer, I’ve simplified a bunch of things and I may be wrong about some details (hopefully not too much). If you see that I'm outright misleading people, please reach out and correct me!
+
+---
+
+Discuss this article on [lobste.rs](https://lobste.rs/s/7f8exp/how_wine_works_101)
+
+---
