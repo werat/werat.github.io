@@ -1,4 +1,7 @@
-# Talks from conferences and meetups
+---
+# TODO: Find a way to have short <title>, but long text title
+title: "Talks"
+---
 
 ## # Building a faster expression evaluator for LLDB
 
