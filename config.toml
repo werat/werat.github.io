@@ -33,22 +33,36 @@ disqusShortname = "werat-github-io"
   style = "friendly"
 
 [[params.social]]
-  name = "Github"
-  icon = "fa fa-2x fa-github"
-  weight = 1
-  url = "https://github.com/werat/"
-
-[[params.social]]
   name = "Twitter"
   icon = "fa fa-2x fa-twitter"
-  weight = 2
+  weight = 1
   url = "https://twitter.com/werat/"
+
+[[params.social]]
+  name = "Github"
+  icon = "fa fa-2x fa-github"
+  weight = 2
+  url = "https://github.com/werat/"
 
 [[params.social]]
   name = "LinkedIn"
   icon = "fa fa-2x fa-linkedin"
   weight = 3
   url = "https://www.linkedin.com/in/werat/"
+
+[[params.social]]
+  name = "Email"
+  icon = "fa fa-2x fa-envelope-o"
+  weight = 4
+  url = "mailto:weratt@gmail.com"
+
+[[params.social]]
+  name = "RSS"
+  icon = "fa fa-2x fa-rss"
+  weight = 5
+  url = "https://werat.dev/index.xml"
+  rel = "alternate"
+  type = "application/rss+xml"
 
 [[menu.main]]
   name = "Blog"
@@ -59,11 +73,3 @@ disqusShortname = "werat-github-io"
   name = "Talks"
   weight = 2
   url = "talks/"
-
-[[params.social]]
-  name = "RSS"
-  icon = "fa fa-2x fa-rss"
-  weight = 3
-  url = "https://werat.dev/index.xml"
-  rel = "alternate"
-  type = "application/rss+xml"
