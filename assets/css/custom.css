@@ -56,4 +56,15 @@ pre > code {
 
 a {
     font-weight: unset;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+}
+.navigation a {
+    text-decoration: none;
+}
+.tag a {
+    text-decoration: none;
+}
+.footer a {
+    text-decoration: none;
 }
