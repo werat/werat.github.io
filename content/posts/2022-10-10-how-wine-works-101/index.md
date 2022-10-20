@@ -335,4 +335,9 @@ I hope this article gave you a basic idea of how Wine works. As I warned in the 
 
 Discuss this article on [lobste.rs](https://lobste.rs/s/7f8exp/how_wine_works_101) or [HackerNews](https://news.ycombinator.com/item?id=33156727) or Reddit ([r/Linux_Gaming](https://www.reddit.com/r/linux_gaming/comments/y0ts39/how_wine_works_101/), [r/programming](https://www.reddit.com/r/programming/comments/y0tbuf/how_wine_works_101/))
 
+Unofficial translations:
+
+* Russian -- <https://habr.com/ru/company/dcmiran/blog/693842/>
+* Chinese -- <https://www.freebuf.com/articles/system/346955.html>
+
 ---
