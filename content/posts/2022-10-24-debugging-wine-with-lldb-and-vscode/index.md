@@ -16,23 +16,11 @@ draft: true
 
 In my [previous post about Wine](/blog/how-wine-works-101/) I mentioned a debugger that is capable of debugging both the Wine layer and the Windows application running with it. Time to share some details!
 
-The debugger in question is [LLDB](https://lldb.llvm.org/) with a few custom patches. LLDB is a mature modern debugger; it works on a number of platforms (Linux, Windows, macOS) and supports various formats of object files (ELF, PE/COFF, Mach-o) and debug information (DWARF, PDB).
+---
 
-_Normally_ the main executable and its dynamic libraries all have the same formats of object files (e.g. ELF on Linux) and debug info (e.g. PDB on Windows). The debuggers also often make certain assumptions about how the dynamic loader works (remember `ld.so`?), since there's usually just one. However, certain applications are special and don't fit into this perfect picture...
+Debugging Wine applications is tricky and there are different ways to do it. In many cases you don't have access to the application source code and/or debug symbols and Wine itself is often built with aggressive optimizations. The mixture of Windows and Linux modules makes most debuggers sad and people often resort to [printf-debugging](https://www.codeweavers.com/blog/aeikum/2019/1/15/working-on-wine-part-4-debugging-wine). The official [Wine Developer's Guide](https://wiki.winehq.org/Wine_Developer%27s_Guide) has some [Debugging Hints](https://wiki.winehq.org/Debugging_Hints) and a whole chapter about [Debugging Wine](https://wiki.winehq.org/Wine_Developer%27s_Guide/Debugging_Wine). It has useful links and examples of using [winedbg](https://gitlab.winehq.org/wine/wine/-/tree/master/programs/winedbg) -- a debugger written specifically for Wine. It came a long way and supports lots of features now, but still has limitations. 
 
-## Why can't it just work?
-
-An application running with Wine has two different dynamic loaders and a mixture of ELF/PE modules and DWARF/PDB debug information. Here's a quick overview of the dependencies involved when a Windows binary is executed on a Linux system via Wine, e.g. `wine HalfLife4.exe`:
-
-* `wine` is a native Linux executable (ELF+DWARF), which is bootstrapped via the `ld.so` dynamic loader
-* `wine` is a dynamic loader itself, which loads the native Windows executable `HalfLife4.exe` (PE+PDB)
-* `HalfLife4.exe` may depend on some native Windows libraries, e.g. `GameEngine.dll` (PE+PDB)
-* `HalfLife4.exe` also depends on certain Windows DLLs, e.g. `ntdll.dll`
-* `ntdll.dll` is provided by Wine as a dll/so pair: `ntdll.dll` (PE+DWARF) + `ntdll.so` (ELF+DWARF)
-
-As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints, etc. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed. One big thing missing is support for Wine dynamic loader, which we have implemented -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) (and maybe it will eventually make its way into upstream 😃).
-
-In this article I'm using a local Windows machine to run the debugger and a remote Linux machine to run the Wine application. The debugger can work on Linux and macOS too, but Windows has better PDB support (see more below in the section about building LLDB). Also, my workflow involves rebuilding the original executable from source, which needs to happen on Windows.
+In this article I will demonstrate how to use [LLDB](https://lldb.llvm.org/) to debug an application running with Wine. We'll step through both the application code (i.e. Windows executable) and the Wine layer (which is mixture of Linux and Windows libraries), set some breakpoints and look at variables and memory. I'm going to use a local Windows machine to run the debugger and a remote Linux machine to run the Wine application. The debugger can work on Linux and macOS too, but Windows has better PDB support -- see more below in the section about building LLDB. Also, my workflow involves rebuilding the original executable from source, which needs to happen on Windows.
 
 ## Demo time!
 
@@ -43,6 +31,20 @@ Here's a quick demo of running a command-line LLDB on Windows. It demonstrates c
 While I still have your attention, here's a teaser demo of using the same debugger with Visual Studio Code. Here I'm using my local Windows machine to debug a native Windows binary running on a remote Linux machine via Wine, isn't that magic? I can step through the code, set breakpoints and look at the variables as if it were a normal local process.
 
 ![Visual Studio Code debugging teaser](vscode-teaser.png)
+
+## Why can't it just work?
+
+_Normally_ the main executable and its dynamic libraries all have the same formats of object files (e.g. ELF on Linux) and debug info (e.g. PDB on Windows). The debuggers also often make certain assumptions about how the dynamic loader works (remember `ld.so`?), since there's usually just one. However, certain applications are special and don't fit into this perfect picture...
+
+An application running with Wine has two different dynamic loaders and a mixture of ELF/PE modules and DWARF/PDB debug information. Here's a quick overview of the dependencies involved when a Windows binary is executed on a Linux system via Wine, e.g. `wine HalfLife4.exe`:
+
+* `wine` is a native Linux executable (ELF+DWARF), which is bootstrapped via the `ld.so` dynamic loader
+* `wine` is a dynamic loader itself, which loads the native Windows executable `HalfLife4.exe` (PE+PDB)
+* `HalfLife4.exe` may depend on some native Windows libraries, e.g. `GameEngine.dll` (PE+PDB)
+* `HalfLife4.exe` also depends on certain Windows DLLs, e.g. `ntdll.dll`
+* `ntdll.dll` is provided by Wine as a dll/so pair: `ntdll.dll` (PE+DWARF) + `ntdll.so` (ELF+DWARF)
+
+As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints, etc. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed. One big thing missing is support for Wine dynamic loader, which we have implemented -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) (and maybe it will eventually make its way into upstream 😃).
 
 ## Building LLDB
 
@@ -258,11 +260,11 @@ CodeLLDB supports [various variable formats](https://github.com/vadimcn/vscode-l
 
 ## Other ways to debug Wine
 
-Debugging Wine applications is tricky and there are different ways to do it. It's often the case that you don't have access to the application source code and debug symbols, so you can only effectively inspect the Wine layer. And the Wine libraries are often built with aggressive optimizations, which doesn't make the job easier.
+As I mentioned in the beginning, using `winedbg` is an option. It can also be used as a server for GDB/LLDB, but some things may not work in this mode (e.g. PDB support). It's also possible to use GDB, see <https://trofi.github.io/posts/221-debugging-wine.html> for example. There's a [GDB fork](https://github.com/JuliaComputing/gdb-solib-wine) from JuliaComputing with some Wine-specific improvements, but it seems to have problems with PDBs too. It's been a while since I tried it, things may have changed.
 
-The official [Wine Developer's Guide](https://wiki.winehq.org/Wine_Developer%27s_Guide) has some [Debugging Hints](https://wiki.winehq.org/Debugging_Hints) and a whole chapter about [Debugging Wine](https://wiki.winehq.org/Wine_Developer%27s_Guide/Debugging_Wine). It has some useful links and examples of using [winedbg](https://gitlab.winehq.org/wine/wine/-/tree/master/programs/winedbg) -- a special debugger written specifically for debugging Wine. It's worth noting that `winedbg` came a long way and supports lots of features now too. Writing a DAP adapter for it could be a cool project to make it usable with Visual Studio Code and other editors 😜
+## Happy 🍷 debugging!
 
-Happy 🍷 debugging!
+Wine is a special thing in many ways and definitely not the easiest thing to debug. But the debuggers are getting better and better and the day is not far off when Wine can be debugged just as any other application. There are no fundamental restrictions here, it just needs a bit of attention 😛
 
 ---
 
