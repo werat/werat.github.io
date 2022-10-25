@@ -16,9 +16,9 @@ draft: true
 
 In my [previous post about Wine](/blog/how-wine-works-101/) I mentioned a debugger that is capable of debugging both the Wine layer and the Windows application running with it. Time to share some details!
 
-The debugger in question is [LLDB](https://lldb.llvm.org/) with a few custom patches. LLDB is a mature modern debugger; it works on a number of platforms (Linux, Windows, macOS) and supports various formats for object files (ELF, PE/COFF, Mach-o) and debug information (DWARF, PDB).
+The debugger in question is [LLDB](https://lldb.llvm.org/) with a few custom patches. LLDB is a mature modern debugger; it works on a number of platforms (Linux, Windows, macOS) and supports various formats of object files (ELF, PE/COFF, Mach-o) and debug information (DWARF, PDB).
 
-_Normally_ the main executable and its dynamic libraries all have the same format of the object files (e.g. ELF on Linux) and the same format of the debug information (e.g. PDB on Windows). The debuggers also often make certain assumptions about how the dynamic loader works (remember `ld.so`?), since there's usually just one. However, certain applications are special and don't fit into this perfect picture...
+_Normally_ the main executable and its dynamic libraries all have the same formats of object files (e.g. ELF on Linux) and debug info (e.g. PDB on Windows). The debuggers also often make certain assumptions about how the dynamic loader works (remember `ld.so`?), since there's usually just one. However, certain applications are special and don't fit into this perfect picture...
 
 ## Why can't it just work?
 
@@ -30,13 +30,13 @@ An application running with Wine has two different dynamic loaders and a mixture
 * `HalfLife4.exe` also depends on certain Windows DLLs, e.g. `ntdll.dll`
 * `ntdll.dll` is provided by Wine as a dll/so pair: `ntdll.dll` (PE+DWARF) + `ntdll.so` (ELF+DWARF)
 
-As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints, etc. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed. One big thing missing is the support for the Wine dynamic loader, which we have implemented -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) (and maybe it will eventually make its way into upstream 😃).
+As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints, etc. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed. One big thing missing is support for Wine dynamic loader, which we have implemented -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) (and maybe it will eventually make its way into upstream 😃).
 
 In this article I'm using a local Windows machine to run the debugger and a remote Linux machine to run the Wine application. The debugger can work on Linux and macOS too, but Windows has better PDB support (see more below in the section about building LLDB). Also, my workflow involves rebuilding the original executable from source, which needs to happen on Windows.
 
 ## Demo time!
 
-Here's a quick demo of running a command-line LLDB on Windows. It demonstrates connecting to a remote Linux machine, attaching to a Wine process and doing typical debugging things: looking at the call stack, setting breakpoints and stepping, looking at variables and reading the memory.
+Here's a quick demo of running a command-line LLDB on Windows. It demonstrates connecting to a remote Linux machine, attaching to a Wine process and doing typical debugging things: looking at the call stack, setting breakpoints and stepping, looking at variables and reading memory.
 
 [![Debugging Wine with LLDB on Windows](https://asciinema.org/a/J95lTmBX9FcHtiRREP2wxZUhu.svg)](https://asciinema.org/a/J95lTmBX9FcHtiRREP2wxZUhu)
 
@@ -81,7 +81,7 @@ PS D:\> D:\src\llvm-project\build_optdebug\bin\lldb.exe
 
 ^ this assumes there's an `lldb-server` running on the remote host
 
-The attaching may take some time as the debugger needs to download the binaries and resolve the symbols, process them, build up some internal state (e.g. the debug information lookup indexes), resolve the breakpoints and so on. LLDB is not very efficient in downloading the binaries over network, but it does have a cache, so subsequent attaches should be much faster. The result of the `process attach` should look something like this:
+The attaching may take some time as the debugger needs to download the binaries and resolve the symbols, process them, build up some internal state (e.g. debug information lookup indexes), resolve the breakpoints and so on. LLDB is not very efficient in downloading the binaries over network, but it does have a cache, so subsequent attaches should be much faster. The result of the `process attach` should look something like this:
 
 ```c++
 Process 15872 stopped
@@ -136,15 +136,15 @@ HalfLife4.exe                   -- PE/PDB
      \ libc-2.24.so             -- ELF/DWARF
 ```
 
-The application was built in a debug mode, so it depends on the debug versions of the standard library -- i.e. `msvcp140d.dll` instead of `msvcp140.dll`. Wine has release versions of these DLLs, but the debug ones should be provided by the user. In this case I just copied over the original Windows DLL and it works.
+The application was built in debug mode, so it depends on the debug versions of the standard library -- i.e. `msvcp140d.dll` instead of `msvcp140.dll`. Wine has release versions of these DLLs, but the debug ones should be provided by the user. In this case I just copied over the original Windows DLL and it works.
 
 ---
 
-If your call stack abruptly stops at `__wine_syscall_dispatcher` make sure your Wine is built with this patch -- <https://gitlab.winehq.org/wine/wine/-/merge_requests/1065> by [florian-kuebler](https://github.com/florian-kuebler). The syscall dispatcher function is written in pure assembly ([src](https://gitlab.winehq.org/wine/wine/-/blob/e72a16b57f66b63a16bb3d1619ac4d42632cb141/dlls/ntdll/unix/signal_x86_64.c#L3351)) and manually manipulates the registers and changes the stack layout. The compiler is not able to automatically generate the unwind information and that's why the debugger cannot reconstruct the call stack. The Florian's patch adds the CFI (Call Frame Information) entries which tell the compiler how the unwind information should look like. For more info about CFI see [CFI directives in assembly files](https://www.imperialviolet.org/2017/01/18/cfi.html).
+If your call stack abruptly stops at `__wine_syscall_dispatcher` make sure your Wine is built with this patch -- <https://gitlab.winehq.org/wine/wine/-/merge_requests/1065> by [florian-kuebler](https://github.com/florian-kuebler). The syscall dispatcher function is written in pure assembly ([src](https://gitlab.winehq.org/wine/wine/-/blob/e72a16b57f66b63a16bb3d1619ac4d42632cb141/dlls/ntdll/unix/signal_x86_64.c#L3351)) and manually manipulates the registers and changes the stack layout. The compiler is not able to automatically generate the unwind information and that's why the debugger cannot reconstruct the call stack. Florian's patch adds the CFI (Call Frame Information) entries which tell the compiler how the unwind information should look like. For more info about CFI see [CFI directives in assembly files](https://www.imperialviolet.org/2017/01/18/cfi.html).
 
 ---
 
-Let's try switching the frame with `ntdll.so!NtDelayExecution` and see what's happening there:
+Let's try switching to the frame with `ntdll.so!NtDelayExecution` and see what's happening there:
 
 ```c++
 (lldb) frame select 1
