@@ -1,6 +1,6 @@
 ---
 title: "Debugging Wine with LLDB and VSCode"
-date:   2022-10-24 16:20:00 +0100
+date:   2022-10-26 15:20:00 +0100
 tags:
    - debugging
    - gaming
@@ -9,7 +9,6 @@ tags:
    - vscode
    - windows
    - wine
-draft: true
 ---
 
 ![DALL-E generated doggo debugging Wine](debugging-doggo.png)
