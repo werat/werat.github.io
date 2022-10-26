@@ -14,11 +14,11 @@ draft: true
 
 ![DALL-E generated doggo debugging Wine](debugging-doggo.png)
 
-In my [previous post about Wine](/blog/how-wine-works-101/) I mentioned a debugger that is capable of debugging both the Wine layer and the Windows application running with it. Time to share some details!
+In my [previous post about Wine](/blog/how-wine-works-101/) I mentioned working on a debugger that is capable of debugging both the Wine layer and the Windows application running with it. Time to share some details!
 
 ---
 
-Debugging Wine applications is tricky and there are different ways to do it. In many cases you don't have access to the application source code and/or debug symbols and Wine itself is often built with aggressive optimizations. The mixture of Windows and Linux modules makes most debuggers sad and people often resort to [printf-debugging](https://www.codeweavers.com/blog/aeikum/2019/1/15/working-on-wine-part-4-debugging-wine). The official [Wine Developer's Guide](https://wiki.winehq.org/Wine_Developer%27s_Guide) has some [Debugging Hints](https://wiki.winehq.org/Debugging_Hints) and a whole chapter about [Debugging Wine](https://wiki.winehq.org/Wine_Developer%27s_Guide/Debugging_Wine). It has useful links and examples of using [winedbg](https://gitlab.winehq.org/wine/wine/-/tree/master/programs/winedbg) -- a debugger written specifically for Wine. It came a long way and supports lots of features now, but still has limitations. 
+Debugging Wine applications is tricky and there are different ways to do it. In many cases you don't have access to the application source code and/or debug symbols and Wine itself is often built with aggressive optimizations. The mixture of Windows and Linux modules makes most debuggers sad and people often resort to [printf-debugging](https://www.codeweavers.com/blog/aeikum/2019/1/15/working-on-wine-part-4-debugging-wine). The official [Wine Developer's Guide](https://wiki.winehq.org/Wine_Developer%27s_Guide) has some [Debugging Hints](https://wiki.winehq.org/Debugging_Hints) and a whole chapter about [Debugging Wine](https://wiki.winehq.org/Wine_Developer%27s_Guide/Debugging_Wine). It has useful links and examples of using [winedbg](https://gitlab.winehq.org/wine/wine/-/tree/master/programs/winedbg) -- a debugger written specifically for Wine. It came a long way and supports lots of features now, but still has limitations.
 
 In this article I will demonstrate how to use [LLDB](https://lldb.llvm.org/) to debug an application running with Wine. We'll step through both the application code (i.e. Windows executable) and the Wine layer (which is mixture of Linux and Windows libraries), set some breakpoints and look at variables and memory. I'm going to use a local Windows machine to run the debugger and a remote Linux machine to run the Wine application. The debugger can work on Linux and macOS too, but Windows has better PDB support -- see more below in the section about building LLDB. Also, my workflow involves rebuilding the original executable from source, which needs to happen on Windows.
 
@@ -44,11 +44,11 @@ An application running with Wine has two different dynamic loaders and a mixture
 * `HalfLife4.exe` also depends on certain Windows DLLs, e.g. `ntdll.dll`
 * `ntdll.dll` is provided by Wine as a dll/so pair: `ntdll.dll` (PE+DWARF) + `ntdll.so` (ELF+DWARF)
 
-As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints, etc. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed. One big thing missing is support for Wine dynamic loader, which we have implemented -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) (and maybe it will eventually make its way into upstream 😃).
+As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints, etc. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed. One big thing missing is support for Wine dynamic loader, which my team have implemented -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) (and maybe it will eventually make its way into upstream 😃). There's a bunch of other patches in the repo that improve things here and there, but the dynamic loader support is only one _required_ for the rest of the article to work.
 
 ## Building LLDB
 
-First, we need to build our own version of LLDB with the Wine-related patches applied. I've open-sourced most of the internal patches we have, they're available in the [googlestadia/vsi-lldb](https://github.com/googlestadia/vsi-lldb/tree/master/patches/llvm-project) repository (or [werat/llvm-project-wine](https://github.com/werat/llvm-project-wine) for an easier checkout). These patches can be applied cleanly on the `release/14.x` branch and _may_ require some merging/rebasing for the newer versions of llvm-project.
+First, we need to build our own version of LLDB with Wine-related patches applied. I've open-sourced most of the internal patches we have, they're available in [googlestadia/vsi-lldb](https://github.com/googlestadia/vsi-lldb/tree/master/patches/llvm-project) repository (or [werat/llvm-project-wine](https://github.com/werat/llvm-project-wine) for an easier checkout). These patches can be applied cleanly on `release/14.x` branch and _may_ require some merging/rebasing for newer versions of llvm-project.
 
 ```bash
 # Clone LLDB sources and custom patches for Wine support.
@@ -66,7 +66,7 @@ cmake -GNinja -DLLVM_ENABLE_PROJECTS="lldb" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 ninja lldb
 ```
 
-There's one caveat regarding the PDB support in LLDB. LLDB has two implementations of the PDB parser: `NativePDB` with no external dependencies and `PDB` which uses [DIA SDK](https://learn.microsoft.com/en-us/visualstudio/debugger/debug-interface-access/debug-interface-access-sdk?view=vs-2022) (and therefore works only on Windows). The "native" parser works on any platform, but it is still work in progress and is missing lots of features. Its primary focus is post-mortem debugging (i.e. coredumps) and it doesn't work well with real-time debugging yet. The other one is more complete and works reasonably well, but it's a bit slower and supported only on Windows.
+There's one caveat regarding PDB support in LLDB. LLDB has two implementations of the PDB parser: `NativePDB` with no external dependencies and `PDB` which uses [DIA SDK](https://learn.microsoft.com/en-us/visualstudio/debugger/debug-interface-access/debug-interface-access-sdk?view=vs-2022) (and therefore works only on Windows). The "native" parser works on any platform, but it is still work in progress and is missing lots of features. Its primary focus is post-mortem debugging (i.e. coredumps) and it doesn't work well with real-time debugging yet. The other one is more complete and works reasonably well, but it's a bit slower and supported only on Windows.
 
 The `PDB` parser is used by default and the debugger needs to locate `msdia140.dll`, which is typically installed with Visual Studio, e.g. `[VisualStudioFolder]\DIA SDK\bin\msdia140.dll`. Either add that to `PATH` or copy the DLL to the LLDB installation location (i.e. next to the `lldb.exe/liblldb.dll`). In order to use `NativePDB` set the environmental variable `LLDB_USE_NATIVE_PDB_READER=1` when running the debugger.
 
@@ -260,11 +260,11 @@ CodeLLDB supports [various variable formats](https://github.com/vadimcn/vscode-l
 
 ## Other ways to debug Wine
 
-As I mentioned in the beginning, using `winedbg` is an option. It can also be used as a server for GDB/LLDB, but some things may not work in this mode (e.g. PDB support). It's also possible to use GDB, see <https://trofi.github.io/posts/221-debugging-wine.html> for example. There's a [GDB fork](https://github.com/JuliaComputing/gdb-solib-wine) from JuliaComputing with some Wine-specific improvements, but it seems to have problems with PDBs too. It's been a while since I tried it, things may have changed.
+As I mentioned in the beginning, using winedbg is an option. It can be run as a gdb-server, so any compatible debugger (like GDB or LLDB) can be used as a frontend. However, depending on the platform and the frontend, certain things may not work properly (e.g. PDB support).
 
-## Happy 🍷 debugging!
+It's possible to use GDB directly too, here's an example -- <https://trofi.github.io/posts/221-debugging-wine.html>. There is also a [GDB fork](https://github.com/JuliaComputing/gdb-solib-wine) from JuliaComputing with some Wine-related improvements. It is primarily intended for situations where winedbg cannot be used, e.g. in [rr](https://rr-project.org/) traces, but it can be used for regular real-time debugging too.
 
-Wine is a special thing in many ways and definitely not the easiest thing to debug. But the debuggers are getting better and better and the day is not far off when Wine can be debugged just as any other application. There are no fundamental restrictions here, it just needs a bit of attention 😛
+Happy 🍷 debugging!
 
 ---
 
