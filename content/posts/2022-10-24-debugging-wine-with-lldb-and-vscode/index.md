@@ -44,11 +44,33 @@ An application running with Wine has two different dynamic loaders and a mixture
 * `HalfLife4.exe` also depends on certain Windows DLLs, e.g. `ntdll.dll`
 * `ntdll.dll` is provided by Wine as a dll/so pair: `ntdll.dll` (PE+DWARF) + `ntdll.so` (ELF+DWARF)
 
-As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints, etc. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed. One big thing missing is support for Wine dynamic loader, which my team have implemented -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) (and maybe it will eventually make its way into upstream 😃). There's a bunch of other patches in the repo that improve things here and there, but the dynamic loader support is only one _required_ for the rest of the article to work.
+As you can see, the application has a crazy mix of different formats and the debugger needs to handle all these combinations in order to correctly unwind the stack, resolve symbols, set breakpoints and so on. Luckily, LLDB doesn't make an assumption that all modules have the same format. It can handle all possible combinations, as long the data is well-formed.
 
-## Building LLDB
+One big thing missing at the moment is the support for Wine dynamic loader. Without it LLDB cannot do much. You can still attach to the process (since it's a regular Linux process after all), but the debugger won't be able to resolve the call stack or see any of the loaded modules:
 
-First, we need to build our own version of LLDB with Wine-related patches applied. I've open-sourced most of the internal patches we have, they're available in [googlestadia/vsi-lldb](https://github.com/googlestadia/vsi-lldb/tree/master/patches/llvm-project) repository (or [werat/llvm-project-wine](https://github.com/werat/llvm-project-wine) for an easier checkout). These patches can be applied cleanly on `release/14.x` branch and _may_ require some merging/rebasing for newer versions of llvm-project.
+```c++
+(lldb) process attach --pid 29354
+Process 29354 stopped
+...
+(lldb) bt
+* thread #1, name = 'HalfLife4.exe', stop reason = signal SIGSTOP
+  * frame #0: 0x00007f1c26939603
+    frame #1: 0x00007f1c265aa79a
+(lldb) target module list
+[  0] 129BD624-C9D6-1B63-8C99-D72D21F0AD2C-2BECC83D 0x0000000000400000 C:\Users\werat\.lldb\module_cache\remote-linux\.cache\129BD624-C9D6-1B63-8C99-D72D21F0AD2C-2BECC83D\wine64-preloader
+[  1] FD79862B-DC7F-5957-F69B-38086ECC9EBC-9DD4538A 0x00007ffc1dce9000 [vdso] (0x00007ffc1dce9000)
+(lldb)
+```
+
+## LLDB + Wine = <3
+
+My teammates and I have put some effort into making LLDB work better with Wine. Some of changes we made have already been merged into upstream LLDB (especially the not-too-wine-specific ones), but others were kept internal. Recently I've published most of the relevant work -- it's available in [googlestadia/vsi-lldb](https://github.com/googlestadia/vsi-lldb/tree/master/patches/llvm-project) repository (or [werat/llvm-project-wine](https://github.com/werat/llvm-project-wine) for an easier checkout). These patches can be applied cleanly on the `release/14.x` branch and _may_ require some merging/rebasing for newer versions of llvm-project.
+
+The most important change to LLDB is about the dynamic loader support for Wine -- [Add-DYLD-plugin-for-debugging-Wine](https://github.com/werat/llvm-project-wine/blob/main/patches/0030-lldb-Add-DYLD-plugin-for-debugging-Wine.patch) by [Jaroslav Sevcik](https://github.com/jaro-sevcik). It enables the debugger to detect and process modules loaded by Wine processes, which is the basic thing it needs to work properly. Maybe this patch will find its way into upstream eventually 😃.
+
+### Building LLDB
+
+First, we need to build our own version of LLDB with Wine-related patches applied. As I mentioned above, you can get the patches from [werat/llvm-project-wine](https://github.com/werat/llvm-project-wine) and they can be applied on `release/14.x` branch without any conflicts.
 
 ```bash
 # Clone LLDB sources and custom patches for Wine support.
@@ -66,11 +88,11 @@ cmake -GNinja -DLLVM_ENABLE_PROJECTS="lldb" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 ninja lldb
 ```
 
-There's one caveat regarding PDB support in LLDB. LLDB has two implementations of the PDB parser: `NativePDB` with no external dependencies and `PDB` which uses [DIA SDK](https://learn.microsoft.com/en-us/visualstudio/debugger/debug-interface-access/debug-interface-access-sdk?view=vs-2022) (and therefore works only on Windows). The "native" parser works on any platform, but it is still work in progress and is missing lots of features. Its primary focus is post-mortem debugging (i.e. coredumps) and it doesn't work well with real-time debugging yet. The other one is more complete and works reasonably well, but it's a bit slower and supported only on Windows.
+There's one caveat regarding PDB support. LLDB has two implementations of the PDB parser: `NativePDB` with no external dependencies and `PDB` which uses [DIA SDK](https://learn.microsoft.com/en-us/visualstudio/debugger/debug-interface-access/debug-interface-access-sdk?view=vs-2022) (and therefore works only on Windows). The "native" parser works on any platform, but it is still work in progress and is missing lots of features. Its primary focus is post-mortem debugging (i.e. coredumps) and it doesn't work well with real-time debugging yet. The other one is more complete and works reasonably well, but it's a bit slower and supported only on Windows.
 
 The `PDB` parser is used by default and the debugger needs to locate `msdia140.dll`, which is typically installed with Visual Studio, e.g. `[VisualStudioFolder]\DIA SDK\bin\msdia140.dll`. Either add that to `PATH` or copy the DLL to the LLDB installation location (i.e. next to the `lldb.exe/liblldb.dll`). In order to use `NativePDB` set the environmental variable `LLDB_USE_NATIVE_PDB_READER=1` when running the debugger.
 
-## Using LLDB in command-line mode
+### Using LLDB in command-line mode
 
 Now that we have a debugger, let's try attaching to a simple Windows application running with Wine. In this setup the application is running on a remote Linux machine (which can be a Linux VM running via WSL, for example).
 
@@ -213,7 +235,7 @@ Process 15872 stopped
 
 Yay, it works! 🎉
 
-## Using Visual Studio Code
+### Using Visual Studio Code
 
 Using command-line is nice and familiar, but the debugging tech is not standing still. Visual Studio Code is quite popular these days and it has a builtin [debugging support](https://code.visualstudio.com/Docs/editor/debugging). It integrates natively with the [Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/) (DAP), which allows plugging in third-party debuggers with minimal effort.
 
