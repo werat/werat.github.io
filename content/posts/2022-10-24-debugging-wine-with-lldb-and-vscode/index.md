@@ -9,6 +9,10 @@ tags:
    - vscode
    - windows
    - wine
+
+# For better Twitter and OpenGraph card
+images:
+   - blog/debugging-wine-with-lldb-and-vscode/debugging-doggo.png
 ---
 
 ![DALL-E generated doggo debugging Wine](debugging-doggo.png)
