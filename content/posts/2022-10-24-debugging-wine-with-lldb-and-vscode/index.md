@@ -289,6 +289,6 @@ Happy 🍷 debugging!
 
 ---
 
-Discuss this article on [lobste.rs](https://lobste.rs/s/g2swg7/debugging_wine_with_lldb_vscode) or [HackerNews](https://news.ycombinator.com/item?id=33345561)
+Discuss this article on [lobste.rs](https://lobste.rs/s/g2swg7/debugging_wine_with_lldb_vscode) or [HackerNews](https://news.ycombinator.com/item?id=33345561) or [Reddit](https://www.reddit.com/r/programming/comments/ye3j7h/debugging_wine_with_lldb_and_vscode/)
 
 ---
