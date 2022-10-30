@@ -60,7 +60,7 @@ disqusShortname = "werat-github-io"
   name = "RSS"
   icon = "fa fa-2x fa-rss"
   weight = 5
-  url = "https://werat.dev/index.xml"
+  url = "index.xml"
   rel = "alternate"
   type = "application/rss+xml"
 
