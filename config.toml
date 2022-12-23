@@ -1,5 +1,5 @@
 baseURL = "https://werat.dev/"
-title = "Reboot and Shine"
+title = "werat.dev"
 theme = "hugo-coder"
 
 disqusShortname = "werat-github-io"
@@ -19,9 +19,6 @@ disqusShortname = "werat-github-io"
   colorScheme = "light"
   hideColorSchemeToggle = true
   customCSS = ["css/custom.css"]
-
-# [params.googleTagManager]
-#  id = "UA-91441325-1"
 
 [params.goatCounter]
   code = "werat-dev"
