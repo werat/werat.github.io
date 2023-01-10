@@ -106,6 +106,7 @@ p {
 .avatar img {
     width: 12.5rem;
     height: auto;
+    aspect-ratio: 1;
     border-radius: 50%;
 }
 
