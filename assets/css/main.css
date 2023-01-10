@@ -104,9 +104,8 @@ p {
 }
 
 .avatar img {
-    width: 12.5rem;
-    height: auto;
-    aspect-ratio: 1;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
 }
 

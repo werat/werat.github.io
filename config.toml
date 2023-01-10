@@ -9,13 +9,12 @@ disqusShortname = "werat-github-io"
 [params]
   favicon_32 = "img/logo-avatar-32.png"
   favicon_16 = "img/logo-avatar-16.png"
-  touchicon = "img/logo-avatar.png"
 
   author = "Andy Hippo"
   license = "MIT"
   license_url = "https://github.com/werat/werat.github.io/blob/main/LICENSE"
   keywords = "blog,developer,personal"
-  avatarURL = "img/logo-avatar.png"
+  avatarURL = "img/logo-avatar.jpg"
   since = 2017
   colorScheme = "light"
   hideColorSchemeToggle = true
