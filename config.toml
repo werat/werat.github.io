@@ -1,6 +1,5 @@
 baseURL = "https://werat.dev/"
 title = "werat.dev"
-theme = "hugo-coder"
 
 disqusShortname = "werat-github-io"
 
@@ -13,6 +12,8 @@ disqusShortname = "werat-github-io"
   touchicon = "img/logo-avatar.png"
 
   author = "Andy Hippo"
+  license = "MIT"
+  license_url = "https://github.com/werat/werat.github.io/blob/main/LICENSE"
   keywords = "blog,developer,personal"
   avatarURL = "img/logo-avatar.png"
   since = 2017
@@ -31,31 +32,31 @@ disqusShortname = "werat-github-io"
 
 [[params.social]]
   name = "Twitter"
-  icon = "fa fa-2x fa-twitter"
+  icon = "twitter"
   weight = 1
   url = "https://twitter.com/werat/"
 
 [[params.social]]
   name = "Github"
-  icon = "fa fa-2x fa-github"
+  icon = "github"
   weight = 2
   url = "https://github.com/werat/"
 
 [[params.social]]
   name = "LinkedIn"
-  icon = "fa fa-2x fa-linkedin"
+  icon = "linkedin"
   weight = 3
   url = "https://www.linkedin.com/in/werat/"
 
 [[params.social]]
   name = "Email"
-  icon = "fa fa-2x fa-envelope-o"
+  icon = "mail"
   weight = 4
   url = "mailto:weratt@gmail.com"
 
 [[params.social]]
   name = "RSS"
-  icon = "fa fa-2x fa-rss"
+  icon = "rss"
   weight = 5
   url = "index.xml"
   rel = "alternate"

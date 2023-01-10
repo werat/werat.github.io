@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang }}">
+
+<head>
+  <title>
+    {{- block "title" . -}}
+    {{ .Site.Title }}
+    {{- end -}}
+  </title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="{{ .Site.Params.author }}">
+  <meta name="description" content="{{ .Description | default (.Summary | default .Site.Params.description ) }}">
+  <meta name="keywords" content="{{ (delimit .Keywords ", ") | default .Site.Params.keywords }}">
+
+  {{ template "_internal/twitter_cards.html" . }}
+  {{ template "_internal/opengraph.html" . }}
+
+  {{- if .Permalink }}
+  <link rel="canonical" href="{{ .Permalink }}">
+  {{- end }}
+  <link rel="icon" type="image/png" href="{{ .Site.Params.favicon_32 | relURL }}" sizes="32x32">
+  <link rel="icon" type="image/png" href="{{ .Site.Params.favicon_16 | relURL }}" sizes="16x16">
+  {{ $style := resources.Get "css/main.css" }}
+  <link rel="stylesheet" href="{{ $style.RelPermalink }}" />
+
+  {{ hugo.Generator }}
+</head>
+
+<body>
+  <header class="nav-header">
+    <nav>
+      <a class="nav-title" href="{{ .Site.BaseURL | relURL }}">
+        {{- .Site.Title -}}
+      </a>
+      {{- range sort .Site.Menus.main }}
+      <a href="{{ .URL | relURL }}">
+        {{- .Name -}}
+      </a>
+      {{- end }}
+    </nav>
+  </header>
+
+  <main>
+    {{ block "content" . }}{{ end }}
+  </main>
+
+  <footer>
+    © {{ .Site.Params.since }} - {{ now.Year }} {{ .Site.Params.author }}
+    · Licensed under <a href="{{ .Site.Params.license_url }}">{{ .Site.Params.license | safeHTML }}</a>
+  </footer>
+
+  <!-- Enable GoatCounter analytics. -->
+  {{- if and .Site.Params.goatCounter .Site.Params.goatCounter.code }}
+  <script data-goatcounter="https://{{ .Site.Params.goatCounter.code }}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  {{- end }}
+</body>
+
+</html>

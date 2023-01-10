@@ -1,0 +1,15 @@
+{{ define "title" }}
+  {{- .Title }} · {{ .Site.Title -}}
+{{ end }}
+{{ define "content" }}
+  <section class="container page">
+    <article>
+      <header>
+        <h1 class="title">
+          <a href="{{ .Permalink | safeURL }}">{{ .Title }}</a>
+        </h1>
+      </header>
+      {{ .Content }}
+    </article>
+  </section>
+{{ end }}

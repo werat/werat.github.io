@@ -1,0 +1,28 @@
+{{ define "title" }}
+  {{- if eq .Kind "term" -}}
+    {{- .Data.Plural | title -}}
+    {{- print ": " -}}
+  {{- end -}}
+  {{- .Title | title }} · {{ .Site.Title -}}
+{{ end }}
+{{ define "content" }}
+  <section class="container list">
+    <h1 class="title">
+      <a href="{{ .Permalink | safeURL }}">
+        {{- if eq .Kind "term" -}}
+          {{- print "Tag: " -}}
+        {{- end -}}
+        {{- default .Title -}}
+      </a>
+    </h1>
+    {{ .Content }}
+    <ul>
+      {{- range .Paginator.Pages }}
+      <li>
+        <span class="date">{{ .Date | time.Format (.Site.Params.dateFormat | default "January 2, 2006" ) }}</span>
+        <a class="title" href="{{ .Params.externalLink | default .RelPermalink }}">{{ .Title }}</a>
+      </li>
+      {{- end }}
+    </ul>
+  </section>
+{{ end }}

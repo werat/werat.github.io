@@ -1,15 +1,30 @@
 {{ define "content" }}
-  {{ partial "home.html" . }}
+  <section class="container centered">
+    <div class="about">
+      <div class="avatar">
+        <img src="{{ .Site.Params.avatarURL | relURL }}" alt="avatar">
+      </div>
+      <h1>{{ .Site.Params.author }}</h1>
+      <ul>
+        {{- range sort .Site.Params.social "weight" }}
+        <li>
+          <a href="{{ .url | safeURL }}" aria-label="{{ .name }}" {{- if .rel }} rel="{{ .rel }}"{{- end -}} {{- if .target }} target="{{ .target }}"{{- end -}} {{- if .type }} type="{{ .type }}"{{- end -}}>
+            {{ partial "feather-icon" .icon }}
+          </a>
+        </li>
+        {{- end }}
+      </ul>
+    </div>
+  </section>
 
   <section class="container list">
     <ul>
-      {{ range where .Site.RegularPages "Section" "posts" }}
+      {{- range where .Site.RegularPages "Section" "posts" }}
       <li>
-        <span class="date">{{ .Date.Format (.Site.Params.dateFormat | default "January 2, 2006" ) }}</span>
+        <span class="date">{{ .Date | time.Format (.Site.Params.dateFormat | default "January 2, 2006" ) }}</span>
         <a class="title" href="{{ .Params.externalLink | default .RelPermalink }}">{{ .Title }}</a>
       </li>
-      {{ end }}
+      {{- end }}
     </ul>
   </section>
-
 {{ end }}
