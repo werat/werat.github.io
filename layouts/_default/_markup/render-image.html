@@ -1,0 +1,2 @@
+{{- $image := .Page.Resources.GetMatch (printf "%s" (.Destination | safeURL)) -}}
+<img src="{{ .Destination | safeURL }}" alt="{{ .Text }}" {{ with .Title}} title="{{ . }}"{{ end }} {{ with $image }} width="{{ $image.Width}}" height="{{ $image.Height}}" {{ end }}/>
