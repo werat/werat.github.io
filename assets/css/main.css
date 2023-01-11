@@ -4,6 +4,15 @@
     margin-block-end: 0;
 }
 
+/*
+Workaround for a weird iOS text rendering issue -- https://stackoverflow.com/q/65849072
+*/
+@media screen and (max-device-width: 480px) {
+    body {
+        -webkit-text-size-adjust: none;
+    }
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -147,6 +156,7 @@ article>header>.title {
 .title a:hover {
     text-decoration: none;
 }
+
 .title a:focus {
     text-decoration: none;
 }
@@ -319,7 +329,6 @@ pre>code {
     white-space: pre;
     display: inline-block;
     background-color: inherit;
-    color: inherit;
 }
 
 .highlight>div,
