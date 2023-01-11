@@ -17,7 +17,7 @@ In the last year I’ve spent quite some time working on a debugger capable of d
 
 ## Disclaimer
 
-<img src="1.png" alt="I have approximate knowledge of many things!" style="max-width:500px;width:100%;">
+![I have approximate knowledge of many things!](1.png "600px")
 
 This article greatly simplifies reality and I don't claim to know all the details. However I hope the explanation here will give you a general understanding of how things like Wine work.
 
@@ -226,7 +226,7 @@ In order to "run" the executable the operating system loads the binary into memo
 
 Yes! The code inside the executables is "portable" between Windows and Linux (assuming the same CPU architecture). If we just take the code out of the Windows executable, load it in memory and point `%rip` to the right place – the processor will happily execute it!
 
-<img src="3.jpg" alt="code is code!" style="max-width:700px;width:100%;">
+![code is code!](3.jpg "700px")
 
 ## Hello, Wine!
 
@@ -309,7 +309,7 @@ So instead we would modify the place that stands in between the binary and the k
 Therefore, when doing a syscall the call stack of the process running with Wine looks like this:
 
 <!-- I don't know why 697px gives the best results, but with other values the image looks blurry -->
-<img src="6.png" alt="call stack of process running with Wine" style="max-width:697px;width:100%;">
+![call stack of process running with Wine](6.png "697px")
 
 The syscall dispatcher is a bridge between the Windows world and the Linux world. It takes care of the calling conventions -- allocates some stack space, moves the registers around, etc. Once the execution is in the Linux library (`ntdll.so`), we're free to use any regular Linux APIs (e.g. libc or syscall) and can actually read/write files, lock/unlock mutexes and so on.
 

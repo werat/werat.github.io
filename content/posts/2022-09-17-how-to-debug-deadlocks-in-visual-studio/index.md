@@ -67,9 +67,7 @@ LldbEventManager.LldbListenerOnModulesChanged
             // Deadlock, main thread is waiting for lock(cache)
 ```
 
----
-
-Fixing deadlocks can be tricky, depending on the logic of your application. Here's the solution I've implemented for this one -- [e66a6b5e](https://github.com/googlestadia/vsi-lldb/commit/e66a6b5e7df879b82e535884bad3ae148b33d68c). The "obvious" thing to do is typically move some operations outside of the critical section, but it's always worth looking deeper -- do I even need this lock? do I have to switch to main thread to perform some operation? Taking a holistic overview often leads to better design improvements.
+Fixing deadlocks can be tricky and it always depends on the logic of your application. Here's the solution I've implemented for this one -- [e66a6b5e](https://github.com/googlestadia/vsi-lldb/commit/e66a6b5e7df879b82e535884bad3ae148b33d68c). The "obvious" thing to do is typically move some operations outside of the critical section, but it's always worth looking deeper -- do I even need this lock? do I have to switch to main thread to perform some operation? Taking a holistic overview often leads to better design improvements.
 
 ---
 

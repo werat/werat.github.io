@@ -35,8 +35,7 @@ Change: 2021-12-02 13:58:10.281221500 +0100
 
 But surprisingly right after I installed the new SDK, I was getting the same build error too. Oh boy, this is going to be interesting. Down to the rabbit hole!
 
-<!-- I don't know another way to set the max width  -->
-<img src="quick-adventure.jpg" alt="quick adventure meme" style="max-width:500px;width: 100%;">
+![quick adventure meme](quick-adventure.jpg "500px")
 
 ---
 
@@ -72,7 +71,7 @@ Well, I did install a newer version of the SDK recently. The sysroot headers obv
 
 It's curious though that the timestamps are different by exactly one hour. When two timestamps are different by exactly N hours programmers usually get real suspicious...
 
-<img src="its-always-you-three.jpg" alt="its always you three meme" style="max-width:500px;width: 100%;">
+![its always you three meme](its-always-you-three.jpg "500px")
 
 ---
 
