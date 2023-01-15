@@ -18,8 +18,11 @@ body {
     flex-direction: column;
     line-height: 1.6em;
     min-height: 100vh;
-    max-width: 900px;
+    max-width: 920px;
     margin: auto;
+
+    padding-left: 1rem;
+    padding-right: 1rem;
 
     font-family:
         -apple-system,
@@ -125,9 +128,6 @@ p {
 
 .container.list {
     width: 100%;
-    max-width: 95ch;
-
-    padding-left: 1ch;
     padding-right: 2ch;
 }
 
