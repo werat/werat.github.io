@@ -1,5 +1,6 @@
 baseURL = "https://werat.dev/"
 title = "werat.dev"
+disableKinds = ["taxonomy", "term"]
 
 disqusShortname = "werat-github-io"
 
@@ -13,8 +14,8 @@ disqusShortname = "werat-github-io"
   author = "Andy Hippo"
   license = "MIT"
   license_url = "https://github.com/werat/werat.github.io/blob/main/LICENSE"
-  keywords = "blog,developer,personal"
   avatarURL = "img/logo-avatar.jpg"
+  keywords = ["blog", "developer", "personal"]
   since = 2017
   colorScheme = "light"
   hideColorSchemeToggle = true

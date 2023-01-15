@@ -1,18 +1,15 @@
 <!DOCTYPE html>
-<html lang="{{ .Site.Language.Lang }}">
+<html lang="en">
 
 <head>
-  <title>
-    {{- block "title" . -}}
-    {{ .Site.Title }}
-    {{- end -}}
-  </title>
+  <title>{{ .Title }}</title>
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="{{ .Site.Params.author }}">
   <meta name="description" content="{{ .Description | default (.Summary | default .Site.Params.description ) }}">
-  <meta name="keywords" content="{{ (delimit .Keywords ", ") | default .Site.Params.keywords }}">
+  {{- $tags := union (union .Site.Params.Keywords .Keywords) .Page.Params.Tags }}
+  <meta name="keywords" content="{{ with $tags }}{{ delimit . ","}}{{ end }}">
 
   {{ template "_internal/twitter_cards.html" . }}
   {{ template "_internal/opengraph.html" . }}
@@ -52,9 +49,7 @@
   </footer>
 
   <!-- Enable GoatCounter analytics. -->
-  {{- if and .Site.Params.goatCounter .Site.Params.goatCounter.code }}
   <script data-goatcounter="https://{{ .Site.Params.goatCounter.code }}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-  {{- end }}
 </body>
 
 </html>
