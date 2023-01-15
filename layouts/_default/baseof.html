@@ -28,13 +28,11 @@
 <body>
   <header class="nav-header">
     <nav>
-      <a class="nav-title" href="{{ .Site.BaseURL | relURL }}">
-        {{- .Site.Title -}}
-      </a>
+      <span class="nav-title">
+        <a href="{{ .Site.BaseURL | relURL }}">{{ .Site.Title }}</a>
+      </span>
       {{- range sort .Site.Menus.main }}
-      <a href="{{ .URL | relURL }}">
-        {{- .Name -}}
-      </a>
+      <a href="{{ .URL | relURL }}">{{ .Name }}</a>
       {{- end }}
     </nav>
   </header>
