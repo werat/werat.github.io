@@ -1,23 +1,21 @@
 {{ define "content" }}
-  <section class="container post">
-    <article>
-      <header>
-        <h1 class="title">
-          <a href="{{ .Permalink | safeURL }}">{{ .Title }}</a>
-        </h1>
-        <time class="posted-on" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
-          {{- .Date | time.Format (.Site.Params.dateFormat | default "January 2, 2006" ) -}}
-        </time>
-      </header>
+  <article>
+    <header>
+      <h1 class="title">
+        <a href="{{ .Permalink | safeURL }}">{{ .Title }}</a>
+      </h1>
+      <time class="posted-on" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+        {{- .Date | time.Format (.Site.Params.dateFormat | default "January 2, 2006" ) -}}
+      </time>
+    </header>
 
-      {{ .Content }}
+    {{ .Content }}
 
-      <!-- Enable disqus for one single post as for legacy backwards compatibility. -->
-      {{ if (eq .Title "Happy ssh agent forwarding for tmux/screen") }}
-      <footer>
-        {{ partial "disqus.html" . }}
-      </footer>
-      {{ end }}
-    </article>
-  </section>
+    <!-- Enable disqus for one single post as for legacy backwards compatibility. -->
+    {{ if (eq .Title "Happy ssh agent forwarding for tmux/screen") }}
+    <footer>
+      {{ partial "disqus.html" . }}
+    </footer>
+    {{ end }}
+  </article>
 {{ end }}
