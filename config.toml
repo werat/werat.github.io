@@ -17,9 +17,6 @@ disqusShortname = "werat-github-io"
   avatarURL = "img/logo-avatar.jpg"
   keywords = ["blog", "developer", "personal"]
   since = 2017
-  colorScheme = "light"
-  hideColorSchemeToggle = true
-  customCSS = ["css/custom.css"]
 
 [params.goatCounter]
   code = "werat-dev"
