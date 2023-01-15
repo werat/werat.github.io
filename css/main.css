@@ -20,9 +20,6 @@ body {
     line-height: 1.6em;
     min-height: 100vh;
 
-    background-color: #fafafa;
-    color: #212121;
-
     font-family:
         -apple-system,
         system-ui,
@@ -140,7 +137,7 @@ article>header {
 }
 
 article>header>.title {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
 }
 
 .heading-link {
@@ -161,31 +158,9 @@ article>header>.title {
     text-decoration: none;
 }
 
-.post-meta .date .posted-on {
-    margin-right: 1rem;
-}
-
-.post-meta i {
-    text-align: center;
-    width: 1.6rem;
-}
-
-.post-meta .tags {
-    margin-top: 0.1em;
-}
-
-.post-meta .tags .tag {
-    display: inline-block;
-    border-radius: 0.6rem;
-    line-height: 1.4em;
-}
-
-.post-meta {
-    color: rgb(64, 64, 64)
-}
-
-.post-meta .tag a {
-    color: inherit;
+.posted-on {
+    font-size: 1.2rem;
+    color: #828282;
 }
 
 .title {
