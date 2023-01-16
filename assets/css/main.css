@@ -68,7 +68,7 @@ a:focus {
     text-decoration: underline;
 }
 
-p {
+p, ul {
     margin: 1rem 0 1rem 0;
 }
 
