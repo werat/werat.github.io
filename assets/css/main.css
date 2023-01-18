@@ -269,17 +269,14 @@ blockquote {
 
 pre {
     overflow-x: auto;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e8ec;
+    border-radius: 4px;
+    background-color: #fbfdff !important;
 }
 
 code {
-    padding: 2px 4px;
-    margin: 0px 2px;
-    border: 1px solid #bbbbbb;
-    border-radius: 5px;
-    background-color: #1b1f230d;
     font-size: 90%;
-    white-space: nowrap;
-
     font-family: SFMono-Regular,
         Consolas,
         Liberation Mono,
@@ -287,16 +284,12 @@ code {
         monospace;
 }
 
-pre>code {
-    border: 0;
-    white-space: pre;
-    display: inline-block;
-    background-color: inherit;
-}
+p code, li code {
+    white-space: nowrap;
+    padding: 2px 4px;
+    margin: 0px 2px;
 
-.highlight>div,
-.highlight>pre {
-    padding: 0.5rem;
-    border-radius: 0.5rem;
     border: 1px solid #bbbbbb;
+    border-radius: 5px;
+    background-color: #f7f7f7;
 }

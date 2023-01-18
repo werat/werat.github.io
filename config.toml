@@ -25,7 +25,7 @@ disqusShortname = "werat-github-io"
   unsafe = true
 
 [markup.highlight]
-  style = "friendly"
+  style = "xcode"
 
 [[params.social]]
   name = "Twitter"
