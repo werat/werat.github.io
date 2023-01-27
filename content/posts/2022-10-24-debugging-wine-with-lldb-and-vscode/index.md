@@ -19,6 +19,8 @@ images:
 
 In my [previous post about Wine](/blog/how-wine-works-101/) I mentioned working on a debugger that is capable of debugging both the Wine layer and the Windows application running with it. Time to share some details!
 
+<!--more-->
+
 ---
 
 Debugging Wine applications is tricky and there are different ways to do it. In many cases you don't have access to the application source code and/or debug symbols and Wine itself is often built with aggressive optimizations. The mixture of Windows and Linux modules makes most debuggers sad and people often resort to [printf-debugging](https://www.codeweavers.com/blog/aeikum/2019/1/15/working-on-wine-part-4-debugging-wine). The official [Wine Developer's Guide](https://wiki.winehq.org/Wine_Developer%27s_Guide) has some [Debugging Hints](https://wiki.winehq.org/Debugging_Hints) and a whole chapter about [Debugging Wine](https://wiki.winehq.org/Wine_Developer%27s_Guide/Debugging_Wine). It has useful links and examples of using [winedbg](https://gitlab.winehq.org/wine/wine/-/tree/master/programs/winedbg) -- a debugger written specifically for Wine. It came a long way and supports lots of features now, but still has limitations.

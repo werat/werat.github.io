@@ -2,6 +2,8 @@
     box-sizing: border-box;
     margin-block-start: 0;
     margin-block-end: 0;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
 }
 
 /*
@@ -68,7 +70,7 @@ a:focus {
     text-decoration: underline;
 }
 
-p, ul {
+p, ul, blockquote {
     margin: 1rem 0 1rem 0;
 }
 
@@ -108,8 +110,8 @@ p, ul {
 }
 
 .avatar img {
-    width: 200px;
-    height: 200px;
+    max-width: 200px;
+    max-height: 200px;
     border-radius: 50%;
 }
 
@@ -262,9 +264,8 @@ img {
 }
 
 blockquote {
-    border-left: 2px solid #e0e0e0;
+    border-left: 2px solid #048eff;
     padding-left: 1rem;
-    font-style: italic;
 }
 
 pre {
