@@ -53,7 +53,7 @@ h6 {
 }
 
 h1 {
-    font-size: 2.2rem;
+    font-size: 2rem;
     line-height: normal;
 }
 
@@ -70,7 +70,9 @@ a:focus {
     text-decoration: underline;
 }
 
-p, ul, blockquote {
+p,
+ul,
+blockquote {
     margin: 1rem 0 1rem 0;
 }
 
@@ -140,25 +142,25 @@ article>header>.title {
     text-decoration: none;
 }
 
-.title a {
+.title {
+    color: #212121;
+}
+
+h1.title a {
     color: inherit;
 }
 
-.title a:hover {
+h1.title a:hover {
     text-decoration: none;
 }
 
-.title a:focus {
+h1.title a:focus {
     text-decoration: none;
 }
 
 .posted-on {
     font-size: 1.2rem;
     color: #828282;
-}
-
-.title {
-    color: #212121;
 }
 
 body>footer {
@@ -247,8 +249,12 @@ img {
 }
 
 .list ul li .title {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     flex: 2;
+}
+
+.list ul li .title a {
+    color: inherit;
 }
 
 .error h1 {
@@ -285,7 +291,8 @@ code {
         monospace;
 }
 
-p code, li code {
+p code,
+li code {
     white-space: nowrap;
     padding: 2px 4px;
     margin: 0px 2px;
