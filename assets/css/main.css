@@ -142,22 +142,6 @@ article>header>.title {
     text-decoration: none;
 }
 
-.title {
-    color: #212121;
-}
-
-h1.title a {
-    color: inherit;
-}
-
-h1.title a:hover {
-    text-decoration: none;
-}
-
-h1.title a:focus {
-    text-decoration: none;
-}
-
 .posted-on {
     font-size: 1.2rem;
     color: #828282;
