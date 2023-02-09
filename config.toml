@@ -8,13 +8,9 @@ disqusShortname = "werat-github-io"
   posts = "/blog/:slug/"
 
 [params]
-  favicon_32 = "img/logo-avatar-32.png"
-  favicon_16 = "img/logo-avatar-16.png"
-
   author = "Andy Hippo"
   license = "MIT"
   license_url = "https://github.com/werat/werat.github.io/blob/main/LICENSE"
-  avatarURL = "img/logo-avatar.jpg"
   keywords = ["blog", "developer", "personal"]
   since = 2017
 

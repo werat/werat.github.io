@@ -19,8 +19,10 @@
   {{ end -}}
   <link rel="alternate" type="application/rss+xml" title="{{ $.Site.Title }}" href="{{ .Site.BaseURL }}index.xml">
 
-  <link rel="icon" type="image/png" href="{{ .Site.Params.favicon_32 | relURL }}" sizes="32x32">
-  <link rel="icon" type="image/png" href="{{ .Site.Params.favicon_16 | relURL }}" sizes="16x16">
+  <link rel="icon" href="/favicon.ico" sizes="any"><!-- 32×32 -->
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"><!-- 180×180 -->
+  <link rel="manifest" href="/manifest.webmanifest">
+
   {{ $style := resources.Get "css/main.css" }}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" />
 
