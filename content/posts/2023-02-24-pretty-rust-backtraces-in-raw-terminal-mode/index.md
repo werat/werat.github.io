@@ -346,6 +346,6 @@ Much better! In my game I'm actually using very few things from `termion`, becau
 
 ---
 
-Discuss this article on [lobste.rs](https://lobste.rs/s/sdh7y9/pretty_rust_backtraces_raw_terminal_mode)
+Discuss this article on [lobste.rs](https://lobste.rs/s/sdh7y9/pretty_rust_backtraces_raw_terminal_mode) or [Reddit](https://www.reddit.com/r/rust/comments/11av0ju/pretty_rust_backtraces_in_raw_terminal_mode/)
 
 ---
