@@ -343,3 +343,9 @@ Much better! In my game I'm actually using very few things from `termion`, becau
 
 1. <https://thevaluable.dev/guide-terminal-shell-console>
 2. <https://viewsourcecode.org/snaptoken/kilo/02.enteringRawMode.html>
+
+---
+
+Discuss this article on [lobste.rs](https://lobste.rs/s/sdh7y9/pretty_rust_backtraces_raw_terminal_mode)
+
+---
