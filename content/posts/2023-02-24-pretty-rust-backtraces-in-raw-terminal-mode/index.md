@@ -216,7 +216,7 @@ fn main() {
 
 This can be solved by using a reentrant mutex instead of a regular `Mutex`. Unfortunately Rust standard library doesn't have one (even though [stdout/stderr are using one internally](https://github.com/rust-lang/rust/blob/3fee48c161a48b0c142d3998fff56faee96bd56c/library/std/src/io/stdio.rs#L553)), so we'd have to use something like `parking_lot::ReentrantMutex` from the [`parking_lot`](https://github.com/Amanieu/parking_lot) crate.
 
-But even though reentrant mutex solves the problem of _locking_ the underlying object multiple times, it exposes a more fundamental issue -- we're trying to have two mutable references at the same time (one at the source of the panic, another in the panic hook), which goes against Rust philosophy. That's why `parking_lot::ReentrantMutex` doesn't allow taking mutable references to the underlying object. We can wrap our terminal object in `RefCell`, but that will have the same problem as the regular mutex. If the panic happens while we're holding a mutable reference via `bottow_mut()` the panic hook will fail:
+But even though reentrant mutex solves the problem of _locking_ the underlying object multiple times, it exposes a more fundamental issue -- we're trying to have two mutable references at the same time (one at the source of the panic, another in the panic hook), which goes against Rust philosophy. That's why `parking_lot::ReentrantMutex` doesn't allow taking mutable references to the underlying object. We can wrap our terminal object in `RefCell`, but that will have the same problem as the regular mutex. If the panic happens while we're holding a mutable reference via `borrow_mut()` the panic hook will fail:
 
 ```rust
 fn main() {
