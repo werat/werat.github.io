@@ -46,7 +46,7 @@
   </main>
 
   <footer>
-    © {{ .Site.Params.since }} - {{ now.Year }} {{ .Site.Params.author }}
+    © {{ .Site.Params.since }} - {{ now.Year }} <a href="mailto:{{ .Site.Params.email }}">{{ .Site.Params.author }}</a>
     · Licensed under <a href="{{ .Site.Params.license_url }}">{{ .Site.Params.license | safeHTML }}</a>
   </footer>
 
