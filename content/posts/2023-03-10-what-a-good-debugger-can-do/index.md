@@ -18,8 +18,6 @@ tags:
 # For better Twitter and OpenGraph card
 images:
    - blog/what-a-good-debugger-can-do/old-man-yells-at-cloud.jpeg
-
-draft: true
 ---
 
 ![Old man yells at printf](old-man-yells-at-cloud.jpeg "570px")
@@ -100,8 +98,6 @@ You fix the condition and save the file. You blink twice and the program picks u
 
 This magic-like feature is called **hot reload** -- a good debugger can pick up the changes in the source code and apply them to a live running program without restarting it. Many people who use dynamic or VM-based languages (like JavaScript or Python or Java) know it's a thing, but not everyone realizes it's possible for compiled languages like C++ or Rust too! For example, Visual Studio supports hot reloading for C++ via [Edit and Continue](https://learn.microsoft.com/en-us/visualstudio/debugger/edit-and-continue-visual-cpp?view=vs-2022). It does have a long list of [restrictions and unsupported changes](https://learn.microsoft.com/en-us/visualstudio/debugger/supported-code-changes-cpp?view=vs-2022#BKMK_Unsupported_changes), but it still works reasonably well in many common scenarios ([demo](https://www.youtube.com/watch?v=x_gr6DNrJuM)).
 
-<!-- {{< youtube x_gr6DNrJuM >}} -->
-
 Another awesome technology is [Live++](https://liveplusplus.tech/index.html) -- arguably, the best hot reload solution available today. It supports different compilers and build systems and can be used with any IDE or debugger. The list of [unsupported scenarios](https://liveplusplus.tech/docs/documentation.html#limitations) is much shorter and many of those are not _fundamental_ restrictions -- with enough effort, hot reload can work with almost any kind of changes.
 
 Hot reload is not _just_ about applying the changes to a live program. A good hot reload implementation can [help to recover from fatal errors](https://liveplusplus.tech/docs/documentation.html#tools_hot_fix) like access violation or [change the optimization levels](https://liveplusplus.tech/docs/documentation.html#tools_hot_deoptimize) (and potentially any other compiler flags) for different compilation units. It can also do that remotely and for multiple processes at the same time. Take a look at this quick demo of Live++ by [@molecularmusing](https://twitter.com/molecularmusing/status/1534631166342488070):
@@ -109,8 +105,6 @@ Hot reload is not _just_ about applying the changes to a live program. A good ho
 <video width=100% controls>
    <source src="live++-hot-reload.mp4" type="video/mp4">
 </video>
-
-<!-- {{< tweet user="molecularmusing" id=1534631166342488070 >}} -->
 
 Hot reload is invaluable in many situations and, honestly, it's hard to imagine a scenario where it _wouldn't_ be helpful. Why restart the application when you don't have to?
 
