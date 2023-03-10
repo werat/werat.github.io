@@ -10,6 +10,7 @@ disqusShortname = "werat-github-io"
 [params]
   author = "Andy Hippo"
   email = "weratt@gmail.com"
+  twitter = "werat"
   license = "MIT"
   license_url = "https://github.com/werat/werat.github.io/blob/main/LICENSE"
   keywords = ["blog", "developer", "personal"]
