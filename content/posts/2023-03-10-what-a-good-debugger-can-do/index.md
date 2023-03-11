@@ -141,7 +141,7 @@ Another awesome tool to try is [WhiteBox](https://whitebox.systems/). It compile
 
 ## To debug or not to debug?
 
-Every existing debugger has its ups and downs; there's no silver bullet, but you already knew that. In some situations logging is more convenient, while in others using a time-traveling debugger can shorten the bug investigation from days to minutes. Debugging technologies have come a long way and even though many things are not as impressive as you might expect, there are a lot of interesting features that are definitely worth checking out. Please use debuggers and complain if something is not working. Demand better from your local debugger vendor, only then way will things improve.
+Every existing debugger has its ups and downs; there's no silver bullet, but you already knew that. In some situations logging is more convenient, while in others using a time-traveling debugger can shorten the bug investigation from days to minutes. Debugging technologies have come a long way and even though many things are not as impressive as you might expect, there are a lot of interesting features that are definitely worth checking out. Please use debuggers and complain if something is not working. Demand better from your local debugger vendor, only then will things improve.
 
 Did I miss your favorite debugger feature? Let me know! This article is in no way exhaustive and I didn't touch other interesting areas like kernel or driver debugging. Share your interesting stories; I'm eager to learn how a debugger saved your life or failed miserably while trying 🤓
 
