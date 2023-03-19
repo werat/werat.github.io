@@ -148,3 +148,7 @@ Did I miss your favorite debugger feature? Let me know! This article is in no wa
 ---
 
 Discuss this article on [lobste.rs](https://lobste.rs/s/uo3sck/what_good_debugger_can_do) or [HackerNews](https://news.ycombinator.com/item?id=35092998) or [Reddit](https://www.reddit.com/r/programming/comments/11nmccf/what_a_good_debugger_can_do/)
+
+Unofficial translations:
+
+* Russian -- <https://habr.com/ru/post/723308/>

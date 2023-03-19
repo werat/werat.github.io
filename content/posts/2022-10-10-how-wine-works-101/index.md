@@ -327,8 +327,6 @@ Fifth, oh, did you want to run a game? Not just a hello world? Then you need to 
 
 Wine has been in development for many years and came a long way. Today you can run the latest games like Cyberpunk 2077 or Elden Ring without any issues. Damn, sometimes Wine has even better performance compared to Windows! What a time to be alive...
 
----
-
 I hope this article gave you a basic idea of how Wine works. As I warned in the disclaimer, I’ve simplified a bunch of things and I may be wrong about some details (hopefully not too much). If you see that I'm outright misleading people, please reach out and correct me!
 
 ---
@@ -339,5 +337,3 @@ Unofficial translations:
 
 * Russian -- <https://habr.com/ru/company/dcmiran/blog/693842/>
 * Chinese -- <https://www.freebuf.com/articles/system/346955.html>
-
----
