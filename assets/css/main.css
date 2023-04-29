@@ -1,11 +1,3 @@
-* {
-    box-sizing: border-box;
-    margin-block-start: 0;
-    margin-block-end: 0;
-    margin-inline-start: 0;
-    margin-inline-end: 0;
-}
-
 /*
 Workaround for a weird iOS text rendering issue -- https://stackoverflow.com/q/65849072
 */
@@ -18,7 +10,7 @@ Workaround for a weird iOS text rendering issue -- https://stackoverflow.com/q/6
 body {
     display: flex;
     flex-direction: column;
-    line-height: 1.6em;
+    line-height: 1.5em;
     min-height: 100vh;
     max-width: 920px;
     margin: auto;
@@ -68,13 +60,6 @@ a:hover {
 
 a:focus {
     text-decoration: underline;
-}
-
-p,
-ul,
-ol,
-blockquote {
-    margin: 1rem 0 1rem 0;
 }
 
 .nav-header {
@@ -257,6 +242,8 @@ img {
 blockquote {
     border-left: 2px solid #048eff;
     padding-left: 1rem;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
 }
 
 pre {
