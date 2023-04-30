@@ -9,7 +9,7 @@ tags:
 
 It's [a good practice](https://web.dev/optimize-cls/#images-without-dimensions) to always include `width` and `height` attributes on images and video elements. Without them the browser has no way of knowing how large the image is going to be and cannot reserve the space in advance when rendering the page. This often leads to the content moving around during the page load, since images take extra time to fetch. This is called [Layout Shift](https://web.dev/cls/) and I find it extremely annoying!
 
-This website is built with [Hugo](https://gohugo.io/) and one of the first things I noticed after running the [PageSpeed Insights](https://pagespeed.web.dev/) analyzer is that it actually doesn't set the size attributes on `<img>` tags! The website content is written in markdown (e.g. [this post](TODO)), so in the source code it looks just like this:
+This website is built with [Hugo](https://gohugo.io/) and one of the first things I noticed after running the [PageSpeed Insights](https://pagespeed.web.dev/) analyzer is that it actually doesn't set the size attributes on `<img>` tags! The website content is written in markdown (e.g. [this post](https://github.com/werat/werat.github.io/blob/956954c4c00055428167c3677d129c2a530e4848/content/posts/2023-04-30-automatic-image-size-attributes-in-hugo/index.md)), so in the source code it looks just like this:
 
 ```markdown
 ![AltText](image.png)
