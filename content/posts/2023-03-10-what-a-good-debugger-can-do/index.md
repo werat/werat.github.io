@@ -1,5 +1,5 @@
 ---
-title: "What a good debugger can do"
+title: "What a good debugger can do 🔥"
 date:   2023-03-10 12:00:00 +0100
 tags:
    - debugging
