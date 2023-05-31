@@ -14,7 +14,7 @@ If you want to contact me, please write an email or tag me on Twitter.
 
 Here's a cute doggo, photo not mine.
 
-[^1]: https://github.com/google/lldb-eval
-[^2]: https://discourse.llvm.org/t/rfc-data-inspection-language/69893
-[^3]: https://werat.dev/blog/how-wine-works-101/
-[^4]: https://werat.dev/blog/debugging-wine-with-lldb-and-vscode/
+[^1]: <https://github.com/google/lldb-eval>
+[^2]: <https://discourse.llvm.org/t/rfc-data-inspection-language/69893>
+[^3]: <https://werat.dev/blog/how-wine-works-101/>
+[^4]: <https://werat.dev/blog/debugging-wine-with-lldb-and-vscode/>
