@@ -58,11 +58,16 @@ disqusShortname = "werat-github-io"
   type = "application/rss+xml"
 
 [[menu.main]]
-  name = "Blog"
+  name = "About"
   weight = 1
+  url = "about/"
+
+[[menu.main]]
+  name = "Blog"
+  weight = 2
   url  = "posts/"
 
 [[menu.main]]
   name = "Talks"
-  weight = 2
+  weight = 3
   url = "talks/"
