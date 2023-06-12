@@ -1,5 +1,5 @@
 ---
-title: "Blazing fast expression evaluation for C++ in LLDB"
+title: "Blazing fast expression evaluation for C++ in LLDB 🔥"
 date:  "2021-03-23"
 tags:
   - lldb

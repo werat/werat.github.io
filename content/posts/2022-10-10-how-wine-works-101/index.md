@@ -1,5 +1,5 @@
 ---
-title: "How Wine works 101 🔥"
+title: "How Wine works 101 🍷"
 date:   2022-10-10 21:20:00 +0100
 tags:
    - wine
