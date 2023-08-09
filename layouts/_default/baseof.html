@@ -10,6 +10,8 @@
   <meta name="description" content="{{ .Description | default (.Summary | default .Site.Params.description ) }}">
   {{- $tags := union (union .Site.Params.Keywords .Keywords) .Page.Params.Tags }}
   <meta name="keywords" content="{{ with $tags }}{{ delimit . ","}}{{ end }}">
+  <!-- Mastodon Verification -->
+  <link rel="me" href="https://mastodon.social/@werat">
 
   {{ template "_internal/twitter_cards.html" . }}
   {{ template "_internal/opengraph.html" . }}
