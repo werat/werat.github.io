@@ -151,20 +151,16 @@ img {
     margin-top: 1.25rem;
 }
 
-.feather {
-    width: 1em;
-    height: 1em;
-}
-
 .feather-icon {
     display: inline-flex;
     align-self: center;
     margin-right: 0.2rem;
 }
-
 .feather-icon svg {
     top: .125em;
     position: relative;
+    width: 1em;
+    height: 1em;
 }
 
 .about {

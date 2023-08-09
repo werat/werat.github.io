@@ -32,27 +32,33 @@ disqusShortname = "werat-github-io"
   url = "https://twitter.com/werat/"
 
 [[params.social]]
+  name = "Mastodon"
+  icon = "mastodon"
+  weight = 2
+  url = "https://mastodon.social/@werat/"
+
+[[params.social]]
   name = "Github"
   icon = "github"
-  weight = 2
+  weight = 3
   url = "https://github.com/werat/"
 
 [[params.social]]
   name = "LinkedIn"
   icon = "linkedin"
-  weight = 3
+  weight = 4
   url = "https://www.linkedin.com/in/werat/"
 
 [[params.social]]
   name = "Email"
   icon = "mail"
-  weight = 4
+  weight = 5
   url = "mailto:weratt@gmail.com"
 
 [[params.social]]
   name = "RSS"
   icon = "rss"
-  weight = 5
+  weight = 6
   url = "index.xml"
   rel = "alternate"
   type = "application/rss+xml"
