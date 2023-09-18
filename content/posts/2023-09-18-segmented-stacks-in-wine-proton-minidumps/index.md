@@ -288,3 +288,10 @@ When maintaining private non-upstreamable patches, it's very important to keep t
      return true;
    }
 ```
+
+---
+
+Discuss this article:
+
+* <https://lobste.rs/s/kwko3s/segmented_stacks_wine_proton_minidumps>
+* <https://www.reddit.com/r/programming/comments/16lsk81/segmented_stacks_in_wineproton_minidumps/>
