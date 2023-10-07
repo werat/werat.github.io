@@ -10,6 +10,12 @@ If you want to contact me, please write an email or tag me on Twitter.
 
 ---
 
+This website is hosted via [GitHub Pages](https://github.com/werat/werat.github.io) and uses [GoatCounter](https://www.goatcounter.com/) analytics for counting page views (since GitHub doesn't offer anything out of the box 😢).
+
+Here's the analytics dashboard -- <https://werat-dev.goatcounter.com/>
+
+---
+
 ![cute-doggo](cute-doggo.jpg "350px")
 
 Here's a cute doggo, photo not mine.
