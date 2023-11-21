@@ -311,6 +311,8 @@ Therefore, when doing a syscall the call stack of the process running with Wine 
 <!-- I don't know why 697px gives the best results, but with other values the image looks blurry -->
 ![call stack of process running with Wine](6.png "697px")
 
+> Want to know how it's possible to have a call stack with *both* Windows and Linux bits? Check out my other article [Debugging Wine with LLDB and VSCode](/blog/debugging-wine-with-lldb-and-vscode/)!
+
 The syscall dispatcher is a bridge between the Windows world and the Linux world. It takes care of the calling conventions -- allocates some stack space, moves the registers around, etc. Once the execution is in the Linux library (`ntdll.so`), we're free to use any regular Linux APIs (e.g. libc or syscall) and can actually read/write files, lock/unlock mutexes and so on.
 
 ## Is that it?
