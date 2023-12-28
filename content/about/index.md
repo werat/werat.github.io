@@ -2,9 +2,9 @@
 title: "About"
 ---
 
-Hi, I'm Andy, software engineer working at Google and living in Munich, Germany. I'm interested in debugging, distributed systems, programming languages and game development. I refactor code to meditate, watch a lot of TV shows and spend way to much time reading blogs posts on the internet.
+Hi, I'm Andy, software engineer working at Google and living in Munich, Germany. I'm interested in developer tools, debugging, distributed systems, programming languages and game development. I refactor code to meditate, watch a lot of TV shows and spend way to much time reading blog posts on the internet.
 
-I used to work on Search, Maps, Big Data (mining), chatbots, developer tools and CI/CD systems, and most recently [cloud gaming](https://en.wikipedia.org/wiki/Google_Stadia), where I did some work on LLDB[^1][^2] and Wine[^3][^4]. In my free time I like playing video games and skiing in the Alps.
+I used to work on Search, Maps, Big Data (mining), chatbots, developer tools and CI/CD systems, [cloud gaming](https://en.wikipedia.org/wiki/Google_Stadia) (where I did some work on LLDB[^1][^2] and Wine[^3][^4]) and now I'm hacking on VSCode, debuggers and languages. In my free time I like playing video games and skiing in the Alps.
 
 If you want to contact me, please write an email or tag me on Twitter.
 
