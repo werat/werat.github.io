@@ -108,3 +108,10 @@ I already gave up with the categorization, so dumping the rest under "random tri
   * <https://0xax.gitbooks.io/linux-insides/content/SysCall/linux-syscall-1.html>
   * How syscalls work from the kernel perspective. If you want to learn more about how the Linux kernel works, be sure the check out the rest of this book.
 
+---
+
+Discuss this article:
+
+* <https://lobste.rs/s/cvdwwr/learning_about_debuggers>
+* <https://news.ycombinator.com/item?id=38920207>
+* <https://www.reddit.com/r/programming/comments/19200s8/learning_about_debuggers/>
