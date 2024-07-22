@@ -139,3 +139,11 @@ The agent is a shared library that is loaded into the target process and has a s
 Executing the break conditions directly in the process code can dramatically (and I mean DRAMATICALLY) improve the performance. The `UDB` debugger leverages the GDB's in-process agent for evaluating breakpoint conditions and the measured performance improvements are ~1000x -- <https://www.youtube.com/watch?v=gcHcGeeJHSA>.
 
 If we want to squeeze the last bits of perf and go _really_ fast, then we have to compile the expressions after all. I'm not aware of any native debugger that actually does that, but LLDB comes pretty close. It has a built-in JIT compiler that's already used for evaluating breakpoint conditions, but it still follows the standard stop-evaluate-continue model. The idea of using JIT to speed up conditional breakpoints has been [flying in the air](https://lldb.llvm.org/resources/projects.html#use-the-jit-to-speed-up-conditional-breakpoint-evaluation) for a while now, however, even though many of the building blocks are already there, there are still enough non-trivial implementation details. Maybe one day...
+
+---
+
+Discuss this article:
+
+* <https://lobste.rs/s/woj8tt/how_conditional_breakpoints_work>
+* <https://news.ycombinator.com/item?id=41036522>
+* <https://www.reddit.com/r/programming/comments/1e9j2ah/how_conditional_breakpoints_work/>
