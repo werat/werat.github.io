@@ -2,7 +2,8 @@ baseURL = "https://werat.dev/"
 title = "werat.dev"
 disableKinds = ["taxonomy", "term"]
 
-disqusShortname = "werat-github-io"
+[services.disqus]
+  shortname = "werat-github-io"
 
 [permalinks]
   posts = "/blog/:slug/"
