@@ -104,7 +104,7 @@ a:focus {
 }
 
 .container.list {
-    width: 100%;
+    /* width: 100%; this adds horisontal scroll on iOS wtf */
     padding-right: 2ch;
 }
 
